@@ -1,1 +1,1 @@
-fastapi
+-r chatbot-service/requirements.txt
