@@ -1,0 +1,240 @@
+[
+  {
+    "year": 1,
+    "yearLabel": "1st Year — Freshman Fundamentals",
+    "description": "Foundational programming constructs, discrete mathematical reasoning, and low-level digital logic.",
+    "subjects": [
+      {
+        "id": "cs-prog-fund",
+        "name": "Programming Fundamentals (C/C++)",
+        "icon": "Code",
+        "description": "Procedural programming, memory layouts, pointers, and algorithmic problem solving.",
+        "topics": [
+          "Pointers & Direct Memory Addressing",
+          "Recursion & Execution Call Stacks",
+          "Bitwise Manipulation & Bitmasking",
+          "Dynamic Memory Allocation (malloc, free)",
+          "Structs, Unions & Memory Alignment",
+          "File I/O and Stream Operations"
+        ]
+      },
+      {
+        "id": "cs-discrete-math",
+        "name": "Discrete Mathematics",
+        "icon": "Brain",
+        "description": "Formal mathematical logic, set theory, combinatorics, and graph theory essential for computer science.",
+        "topics": [
+          "Propositional & Predicate Logic",
+          "Mathematical Induction & Invariants",
+          "Set Theory, Relations & Equivalence Classes",
+          "Combinatorics & Pigeonhole Principle",
+          "Graph Theory Fundamentals (Eulerian, Hamiltonian)",
+          "Recurrence Relations & Generating Functions"
+        ]
+      },
+      {
+        "id": "cs-digital-logic",
+        "name": "Digital Logic & Computer Organization",
+        "icon": "Atom",
+        "description": "Boolean algebra, combinational & sequential circuit synthesis, and digital building blocks.",
+        "topics": [
+          "Boolean Algebra & Karnaugh Maps (K-Maps)",
+          "Combinational Circuits (Multiplexers, Decoders)",
+          "Sequential Circuits (Latches & Flip-Flops)",
+          "Counters & Finite State Machines (FSMs)",
+          "Arithmetic Logic Unit (ALU) Design",
+          "Signed Number Representations & IEEE 754 Floating Point"
+        ]
+      }
+    ]
+  },
+  {
+    "year": 2,
+    "yearLabel": "2nd Year — Core Data Structures & Systems",
+    "description": "Essential data structures, algorithm complexity analysis, object-oriented design, and processor architecture.",
+    "subjects": [
+      {
+        "id": "cs-dsa",
+        "name": "Data Structures",
+        "icon": "Stack",
+        "description": "Linear and hierarchical data structures with rigorous spatial and temporal guarantees.",
+        "topics": [
+          "Balanced Binary Search Trees (AVL, Red-Black Trees)",
+          "Hash Tables & Collision Resolution (Chaining, Probing)",
+          "Priority Queues & Binary/Fibonacci Heaps",
+          "Tries & Prefix Trees for Lexicographic Queries",
+          "Disjoint Set Union (DSU / Union-Find)",
+          "Segment Trees & Fenwick Trees (Binary Indexed Trees)"
+        ]
+      },
+      {
+        "id": "cs-algorithms",
+        "name": "Design & Analysis of Algorithms",
+        "icon": "TrendUp",
+        "description": "Algorithm design paradigms, asymptotic analysis, and computational tractability.",
+        "topics": [
+          "Asymptotic Notation & Master Theorem Analysis",
+          "Divide & Conquer (QuickSort, MergeSort, Inversion Count)",
+          "Greedy Strategy (Huffman Coding, Kruskal/Prim MST)",
+          "Dynamic Programming (0/1 Knapsack, LCS, Matrix Chain)",
+          "Shortest Path Graph Algorithms (Dijkstra, Bellman-Ford)",
+          "NP-Completeness & Polynomial Reductions"
+        ]
+      },
+      {
+        "id": "cs-oop",
+        "name": "Object-Oriented Design & Java/C++",
+        "icon": "BookOpen",
+        "description": "Encapsulation, inheritance, polymorphism, and SOLID design principles.",
+        "topics": [
+          "Virtual Functions & Virtual Method Tables (vtable)",
+          "SOLID Design Principles in Modern Architecture",
+          "Design Patterns (Factory, Observer, Singleton, Strategy)",
+          "Generics, Templates & Collections Architecture",
+          "Exception Handling & Memory Safety (RAII)",
+          "Concurrency Primitives & Multi-threading Basics"
+        ]
+      },
+      {
+        "id": "cs-arch",
+        "name": "Computer Architecture",
+        "icon": "Lightning",
+        "description": "Instruction set architecture, CPU pipelines, cache hierarchies, and memory management.",
+        "topics": [
+          "Instruction Set Architectures (MIPS / RISC-V vs x86)",
+          "Pipelining Stages & Hazard Handling (Data, Structural, Control)",
+          "Branch Prediction & Out-of-Order Execution",
+          "Memory Hierarchy & Multi-level Cache Mapping",
+          "Cache Coherence Protocols (MESI)",
+          "Virtual Memory, Page Tables & Translation Lookaside Buffers (TLB)"
+        ]
+      }
+    ]
+  },
+  {
+    "year": 3,
+    "yearLabel": "3rd Year — Systems, Networks & Databases",
+    "description": "Kernel-level operating system internals, relational query engines, computer networking, and system design.",
+    "subjects": [
+      {
+        "id": "cs-os",
+        "name": "Operating Systems",
+        "icon": "Cpu",
+        "description": "Process orchestration, concurrent synchronization, virtual memory, and I/O subsystems.",
+        "topics": [
+          "Process Scheduling Algorithms & Context Switches",
+          "Concurrency Synchronization (Semaphores, Mutexes, Monitors)",
+          "Deadlock Detection, Prevention & Banker's Algorithm",
+          "Paging, Segmentation & Page Replacement Algorithms",
+          "File System Implementation (Inodes, Ext4)",
+          "Inter-Process Communication (Pipes, Sockets, Shared Memory)"
+        ]
+      },
+      {
+        "id": "cs-dbms",
+        "name": "Database Management Systems",
+        "icon": "Database",
+        "description": "Relational algebra, query optimization, indexing internals, and transaction guarantees.",
+        "topics": [
+          "Relational Calculus & Advanced SQL Queries",
+          "Schema Normalization (1NF, 2NF, 3NF, BCNF)",
+          "B+ Tree Indexing & Hash Indexing Storage Internals",
+          "ACID Transaction Guarantees & Isolation Levels",
+          "Concurrency Control Protocols (Two-Phase Locking, MVCC)",
+          "Database Recovery Techniques (Write-Ahead Logging / ARIES)"
+        ]
+      },
+      {
+        "id": "cs-networks",
+        "name": "Computer Networks",
+        "icon": "Globe",
+        "description": "Protocol layering, routing algorithms, transport guarantees, and packet telemetry.",
+        "topics": [
+          "OSI 7-Layer vs TCP/IP Protocol Architectures",
+          "IPv4/IPv6 Addressing, Subnetting & CIDR",
+          "Routing Algorithms (Dijkstra Link-State, Distance Vector, BGP)",
+          "TCP Flow Control (Sliding Window) & Congestion Control",
+          "DNS Architecture, TLS Handshake & HTTP/2-3",
+          "Socket Programming in C / Python"
+        ]
+      },
+      {
+        "id": "cs-software-eng",
+        "name": "Software Engineering & System Design",
+        "icon": "Briefcase",
+        "description": "Engineering methodologies, architectural patterns, API design, and distributed systems architecture.",
+        "topics": [
+          "Microservices vs Monolith Architecture Tradeoffs",
+          "RESTful API & GraphQL Design Standards",
+          "Load Balancing, Reverse Proxies & CDN Caching",
+          "Message Queues (Kafka, RabbitMQ) & Event-Driven Systems",
+          "Database Sharding, Replication & Partitioning",
+          "Continuous Integration & Continuous Delivery (CI/CD)"
+        ]
+      }
+    ]
+  },
+  {
+    "year": 4,
+    "yearLabel": "4th Year — Advanced Computing & AI",
+    "description": "Artificial intelligence, distributed consensus, compiler engineering, and cybersecurity.",
+    "subjects": [
+      {
+        "id": "cs-ai-ml",
+        "name": "Artificial Intelligence & Machine Learning",
+        "icon": "Brain",
+        "description": "Heuristic search, supervised & unsupervised models, neural networks, and generative AI.",
+        "topics": [
+          "Heuristic Search & Adversarial Minimax with Alpha-Beta Pruning",
+          "Supervised Learning: Linear Regression, Logistic Regression & SVM",
+          "Deep Neural Networks & Backpropagation Calculus",
+          "Convolutional Neural Networks (CNN) for Computer Vision",
+          "Transformer Architecture & Attention Mechanisms",
+          "Large Language Models (LLM) & Retrieval-Augmented Generation (RAG)"
+        ]
+      },
+      {
+        "id": "cs-distributed-systems",
+        "name": "Distributed Systems & Cloud Computing",
+        "icon": "Cloud",
+        "description": "Consensus protocols, distributed transactions, fault tolerance, and cloud topologies.",
+        "topics": [
+          "CAP Theorem, PACELC & Consistency Models",
+          "Consensus Protocols (Raft & Paxos Formalisms)",
+          "Distributed Transactions (Two-Phase Commit, Sagas)",
+          "Vector Clocks & Logical Timestamp Ordering",
+          "Distributed Storage (Google GFS, Amazon Dynamo)",
+          "Containerization (Docker) & Container Orchestration (Kubernetes)"
+        ]
+      },
+      {
+        "id": "cs-compiler-design",
+        "name": "Compiler Design",
+        "icon": "Code",
+        "description": "Lexical analyzers, grammars, syntax trees, intermediate representations, and optimizations.",
+        "topics": [
+          "Lexical Analysis & Regular Expressions to DFAs",
+          "Context-Free Grammars & Top-Down LL(k) Parsing",
+          "Bottom-Up Shift-Reduce Parsing (LR, LALR)",
+          "Syntax-Directed Translation & Abstract Syntax Trees (AST)",
+          "Intermediate Code Generation (Three-Address Code)",
+          "Control Flow Graphs & Code Optimization Passes"
+        ]
+      },
+      {
+        "id": "cs-cybersecurity",
+        "name": "Cybersecurity & Applied Cryptography",
+        "icon": "ShieldCheck",
+        "description": "Cryptographic primitives, authentication protocols, secure coding, and threat mitigation.",
+        "topics": [
+          "Symmetric Encryption (AES, Block Cipher Modes)",
+          "Asymmetric Cryptography (RSA, Diffie-Hellman, ECC)",
+          "Cryptographic Hash Functions (SHA-256) & HMACs",
+          "Public Key Infrastructure (PKI) & X.509 Certificates",
+          "Web Vulnerabilities Mitigation (OWASP Top 10, SQLi, XSS, CSRF)",
+          "Zero-Trust Architecture & Identity Federation (OAuth 2.0 / OIDC)"
+        ]
+      }
+    ]
+  }
+]

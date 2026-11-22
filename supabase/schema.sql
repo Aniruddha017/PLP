@@ -18,11 +18,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     full_name TEXT,
     avatar_url TEXT,
     learning_goal TEXT,
+    year_of_study SMALLINT CHECK (year_of_study BETWEEN 1 AND 4),
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Idempotent column cleanup if migrating from previous draft
+-- Idempotent column additions/cleanups if migrating from previous draft
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS year_of_study SMALLINT CHECK (year_of_study BETWEEN 1 AND 4);
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS tier;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS stripe_customer_id;
 
@@ -133,6 +135,7 @@ AS $$
 DECLARE
     user_full_name TEXT;
     user_avatar TEXT;
+    user_year SMALLINT;
 BEGIN
     -- Extract full name from raw_user_meta_data (Google OAuth or Email sign up)
     user_full_name := COALESCE(
@@ -148,13 +151,24 @@ BEGIN
         ''
     );
 
-    INSERT INTO public.profiles (id, email, full_name, avatar_url)
-    VALUES (NEW.id, NEW.email, user_full_name, user_avatar)
+    -- Extract year of study (1 to 4) if provided
+    BEGIN
+        user_year := (NEW.raw_user_meta_data->>'year_of_study')::SMALLINT;
+        IF user_year < 1 OR user_year > 4 THEN
+            user_year := NULL;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        user_year := NULL;
+    END;
+
+    INSERT INTO public.profiles (id, email, full_name, avatar_url, year_of_study)
+    VALUES (NEW.id, NEW.email, user_full_name, user_avatar, user_year)
     ON CONFLICT (id) DO UPDATE
     SET
         email = EXCLUDED.email,
         full_name = COALESCE(NULLIF(public.profiles.full_name, ''), EXCLUDED.full_name),
         avatar_url = COALESCE(NULLIF(public.profiles.avatar_url, ''), EXCLUDED.avatar_url),
+        year_of_study = COALESCE(public.profiles.year_of_study, EXCLUDED.year_of_study),
         updated_at = NOW();
 
     -- Seed starter topic mastery topics for new learners
@@ -166,6 +180,67 @@ BEGIN
         (NEW.id, 'Algorithms', 'QuickSort Analysis', 82, 'In Review', NOW() + INTERVAL '1 day'),
         (NEW.id, 'Probability', 'Bayes’ Theorem', 90, 'Mastered', NOW() + INTERVAL '3 days')
     ON CONFLICT (user_id, subject, topic_name) DO NOTHING;
+
+-- ==============================================================================
+-- 11. LEARNING ROADMAPS TABLE
+-- Stores personalized, structured step-by-step topic learning paths
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.learning_roadmaps (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
+    subject TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    roadmap JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_user_subject_topic_roadmap UNIQUE (user_id, subject, topic)
+);
+
+CREATE INDEX IF NOT EXISTS idx_roadmaps_user 
+    ON public.learning_roadmaps(user_id, subject);
+
+ALTER TABLE public.learning_roadmaps ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "roadmaps_own" ON public.learning_roadmaps;
+CREATE POLICY "roadmaps_own" ON public.learning_roadmaps
+    FOR ALL
+    TO authenticated
+    USING ((SELECT auth.uid()) = user_id)
+    WITH CHECK ((SELECT auth.uid()) = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
+
+-- ==============================================================================
+-- 12. QUIZ ATTEMPTS TABLE
+-- Powers the Adaptive Assessment Engine & Evaluates Mastery
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.quiz_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
+    subject TEXT NOT NULL,
+    topic_name TEXT NOT NULL,
+    questions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    score INT DEFAULT 0,
+    total INT DEFAULT 0,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_quiz_user_topic 
+    ON public.quiz_attempts(user_id, topic_name);
+
+ALTER TABLE public.quiz_attempts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "quiz_own" ON public.quiz_attempts;
+CREATE POLICY "quiz_own" ON public.quiz_attempts
+    FOR ALL
+    TO authenticated
+    USING ((SELECT auth.uid()) = user_id)
+    WITH CHECK ((SELECT auth.uid()) = user_id);
+
+GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;
 
     RETURN NEW;
 END;
@@ -361,3 +436,64 @@ CROSS JOIN (
         ('Probability', 'Bayes’ Theorem', 90, 'Mastered', 3)
 ) AS t(subject, topic_name, mastery_percentage, status, days_ahead)
 ON CONFLICT (user_id, subject, topic_name) DO NOTHING;
+
+-- ==============================================================================
+-- 11. LEARNING ROADMAPS TABLE
+-- Stores personalized, structured step-by-step topic learning paths
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.learning_roadmaps (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
+    subject TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    roadmap JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    CONSTRAINT uq_user_subject_topic_roadmap UNIQUE (user_id, subject, topic)
+);
+
+CREATE INDEX IF NOT EXISTS idx_roadmaps_user 
+    ON public.learning_roadmaps(user_id, subject);
+
+ALTER TABLE public.learning_roadmaps ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "roadmaps_own" ON public.learning_roadmaps;
+CREATE POLICY "roadmaps_own" ON public.learning_roadmaps
+    FOR ALL
+    TO authenticated
+    USING ((SELECT auth.uid()) = user_id)
+    WITH CHECK ((SELECT auth.uid()) = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
+
+-- ==============================================================================
+-- 12. QUIZ ATTEMPTS TABLE
+-- Powers the Adaptive Assessment Engine & Evaluates Mastery
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.quiz_attempts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
+    subject TEXT NOT NULL,
+    topic_name TEXT NOT NULL,
+    questions JSONB NOT NULL DEFAULT '[]'::jsonb,
+    score INT DEFAULT 0,
+    total INT DEFAULT 0,
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_quiz_user_topic 
+    ON public.quiz_attempts(user_id, topic_name);
+
+ALTER TABLE public.quiz_attempts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "quiz_own" ON public.quiz_attempts;
+CREATE POLICY "quiz_own" ON public.quiz_attempts
+    FOR ALL
+    TO authenticated
+    USING ((SELECT auth.uid()) = user_id)
+    WITH CHECK ((SELECT auth.uid()) = user_id);
+
+GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;

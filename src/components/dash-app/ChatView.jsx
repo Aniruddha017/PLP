@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Logo from '../Logo';
 import { conversationService } from '../../services/conversationService';
+import MarkdownRenderer from '../ui/MarkdownRenderer';
 import {
   User,
   TrendUp,
@@ -12,12 +13,14 @@ import {
   Check,
   CircleNotch,
   Sparkle,
+  ArrowRight,
 } from '../icons';
 
 export const ChatView = ({
   conversation,
   messages = [],
   isThinking = false,
+  onSendMessage,
 }) => {
   const [feedbackState, setFeedbackState] = useState({});
   const [copiedId, setCopiedId] = useState(null);
@@ -124,9 +127,9 @@ export const ChatView = ({
                 </span>
               </div>
 
-              {/* Response Text */}
-              <div className="pl-0 sm:pl-9 font-sans text-xs sm:text-[13.5px] leading-relaxed text-zinc-700 whitespace-pre-wrap">
-                {msg.content}
+              {/* Response Text with Markdown & LaTeX Math */}
+              <div className="pl-0 sm:pl-9">
+                <MarkdownRenderer content={msg.content} />
               </div>
 
               {/* Dynamic Comparison Cards */}
@@ -144,8 +147,8 @@ export const ChatView = ({
                         <span className="font-semibold text-xs text-zinc-900">{card.title}</span>
                       </div>
                       {(card.formula || card.formulaText) && (
-                        <div className="my-3 rounded-xl border border-zinc-200/60 bg-zinc-50/80 px-3 py-3.5 text-center overflow-x-auto font-mono text-sm font-semibold text-zinc-900">
-                          {card.formula || card.formulaText}
+                        <div className="my-3 rounded-xl border border-zinc-200/60 bg-zinc-50/80 px-3 py-3 text-center overflow-x-auto font-mono text-sm font-semibold text-zinc-900">
+                          <MarkdownRenderer content={card.formula || card.formulaText} />
                         </div>
                       )}
                       {card.description && (
@@ -168,6 +171,32 @@ export const ChatView = ({
                   <p className="text-[11.5px] sm:text-xs leading-relaxed text-zinc-600 pl-8">
                     {keyInsight}
                   </p>
+                </div>
+              )}
+
+              {/* Socratic Follow-Up Suggestion Pill */}
+              {(msg.follow_up_question || msg.metadata?.follow_up_question) && (
+                <div className="ml-0 sm:ml-9 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const q = msg.follow_up_question || msg.metadata?.follow_up_question;
+                      if (onSendMessage && q) {
+                        onSendMessage(q);
+                      }
+                    }}
+                    className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200/80 hover:border-zinc-300 text-left transition-all cursor-pointer shadow-2xs text-xs"
+                    title="Click to ask this follow-up question"
+                  >
+                    <span className="font-bold text-zinc-900 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-900 animate-pulse" />
+                      Follow-up Question:
+                    </span>
+                    <span className="text-zinc-600 group-hover:text-zinc-900 font-medium">
+                      {msg.follow_up_question || msg.metadata?.follow_up_question}
+                    </span>
+                    <ArrowRight size={13} weight="bold" className="text-zinc-400 group-hover:text-zinc-900 transition-transform group-hover:translate-x-0.5 shrink-0 ml-1" />
+                  </button>
                 </div>
               )}
 

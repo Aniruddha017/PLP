@@ -16,3 +16,4 @@ class ChatResponse(BaseModel):
     message: str
     cards: list[ConceptCard] = []
     key_insight: str | None = None
+    follow_up_question: str | None = None
