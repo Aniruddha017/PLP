@@ -129,7 +129,7 @@ export const authService = {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, full_name, avatar_url, learning_goal, year_of_study, created_at, updated_at')
+      .select('id, email, full_name, avatar_url, learning_goal, created_at, updated_at')
       .eq('id', userId)
       .maybeSingle();
 
@@ -141,7 +141,7 @@ export const authService = {
   },
 
   /**
-   * Update user profile attributes (full_name, learning_goal, avatar_url, year_of_study)
+   * Update user profile attributes (full_name, learning_goal, avatar_url)
    */
   async updateUserProfile(userId, updates) {
     if (!userId) throw new Error('User ID is required to update profile');
@@ -150,14 +150,13 @@ export const authService = {
     if (updates.full_name !== undefined) safeUpdates.full_name = updates.full_name;
     if (updates.avatar_url !== undefined) safeUpdates.avatar_url = updates.avatar_url;
     if (updates.learning_goal !== undefined) safeUpdates.learning_goal = updates.learning_goal;
-    if (updates.year_of_study !== undefined) safeUpdates.year_of_study = updates.year_of_study;
     safeUpdates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('profiles')
       .update(safeUpdates)
       .eq('id', userId)
-      .select('id, email, full_name, avatar_url, learning_goal, year_of_study, created_at, updated_at')
+      .select('id, email, full_name, avatar_url, learning_goal, created_at, updated_at')
       .single();
 
     if (error) throw error;

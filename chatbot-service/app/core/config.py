@@ -11,7 +11,7 @@ PROJECT_ROOT = CHATBOT_ROOT.parent
 class Settings(BaseSettings):
     # Groq
     groq_api_key: str = ""
-    llm_model: str = "llama-3.3-70b-versatile"
+    llm_model: str = "openai/gpt-oss-120b"
 
     # Supabase standard keys
     supabase_url: str = ""

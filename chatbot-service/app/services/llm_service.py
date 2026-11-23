@@ -1,3 +1,4 @@
+import json
 from groq import Groq
 from groq.types.chat import ChatCompletionMessageParam
 
@@ -49,7 +50,7 @@ class LLMService:
                 )
             return (
                 "Hello! I am your AI Socratic Tutor. "
-                "To enable live LLaMA 3.3 generation from this microservice, please add your GROQ_API_KEY to .env. "
+                "To enable live (changed to openai api from groq) LLaMA 3.3 generation from this microservice, please add your GROQ_API_KEY to .env. "
                 "In the meantime, consider this foundational principle: how do the initial boundary conditions relate to the core theorem?"
             )
 
@@ -68,15 +69,15 @@ class LLMService:
         except Exception as e:
             print(f"[LLMService] Groq API call error: {e}")
             if json_mode:
-                return (
-                    '{\n'
-                    f'  "message": "I encountered an error generating the explanation: {str(e)}",\n'
-                    '  "cards": [],\n'
-                    '  "key_insight": null,\n'
-                    '  "follow_up_question": null\n'
-                    '}'
-                )
-            return f"I encountered an error generating the explanation: {str(e)}"
+                return json.dumps({
+                    "message": f"I encountered an error generating the response: {str(e)}",
+                    "cards": [],
+                    "key_insight": None,
+                    "follow_up_question": None,
+                    "questions": [],
+                    "roadmap": [],
+                })
+            return f"I encountered an error generating the response: {str(e)}"
 
 
 llm_service = LLMService()

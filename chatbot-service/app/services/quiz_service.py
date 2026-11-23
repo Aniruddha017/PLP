@@ -53,7 +53,7 @@ class QuizService:
             "}"
         )
 
-        user_content = f"Generate 4 MCQ questions for Subject: '{subject}' — Topic: '{topic}' at {difficulty} level."
+        user_content = f"Generate 4 MCQ questions strictly in valid JSON format for Subject: '{subject}' — Topic: '{topic}' at {difficulty} level."
 
         messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_content},

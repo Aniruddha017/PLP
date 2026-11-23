@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Stack, Sun, Export, BookmarkSimple, Sparkle, List, Check } from '../icons';
+import { Stack, Sun, Export, BookmarkSimple, Sparkle, List, Check, Lightning } from '../icons';
 
 export const Header = ({
   subject = 'Calculus III',

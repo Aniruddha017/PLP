@@ -181,67 +181,6 @@ BEGIN
         (NEW.id, 'Probability', 'Bayes’ Theorem', 90, 'Mastered', NOW() + INTERVAL '3 days')
     ON CONFLICT (user_id, subject, topic_name) DO NOTHING;
 
--- ==============================================================================
--- 11. LEARNING ROADMAPS TABLE
--- Stores personalized, structured step-by-step topic learning paths
--- ==============================================================================
-CREATE TABLE IF NOT EXISTS public.learning_roadmaps (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
-    subject TEXT NOT NULL,
-    topic TEXT NOT NULL,
-    roadmap JSONB NOT NULL DEFAULT '[]'::jsonb,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    CONSTRAINT uq_user_subject_topic_roadmap UNIQUE (user_id, subject, topic)
-);
-
-CREATE INDEX IF NOT EXISTS idx_roadmaps_user 
-    ON public.learning_roadmaps(user_id, subject);
-
-ALTER TABLE public.learning_roadmaps ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "roadmaps_own" ON public.learning_roadmaps;
-CREATE POLICY "roadmaps_own" ON public.learning_roadmaps
-    FOR ALL
-    TO authenticated
-    USING ((SELECT auth.uid()) = user_id)
-    WITH CHECK ((SELECT auth.uid()) = user_id);
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
-
--- ==============================================================================
--- 12. QUIZ ATTEMPTS TABLE
--- Powers the Adaptive Assessment Engine & Evaluates Mastery
--- ==============================================================================
-CREATE TABLE IF NOT EXISTS public.quiz_attempts (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    conversation_id UUID REFERENCES public.conversations(id) ON DELETE SET NULL,
-    subject TEXT NOT NULL,
-    topic_name TEXT NOT NULL,
-    questions JSONB NOT NULL DEFAULT '[]'::jsonb,
-    score INT DEFAULT 0,
-    total INT DEFAULT 0,
-    completed_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_quiz_user_topic 
-    ON public.quiz_attempts(user_id, topic_name);
-
-ALTER TABLE public.quiz_attempts ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "quiz_own" ON public.quiz_attempts;
-CREATE POLICY "quiz_own" ON public.quiz_attempts
-    FOR ALL
-    TO authenticated
-    USING ((SELECT auth.uid()) = user_id)
-    WITH CHECK ((SELECT auth.uid()) = user_id);
-
-GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;
-
     RETURN NEW;
 END;
 $$;
@@ -400,11 +339,19 @@ CREATE POLICY "mastery_delete_own" ON public.student_topic_mastery
 -- ==============================================================================
 -- 9. PERMISSIONS & DATA API EXPOSURE
 -- ==============================================================================
-GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT SELECT, UPDATE ON public.profiles TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.conversations TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.messages TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.student_topic_mastery TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;
+
+-- Allow backend microservice (service_role) full administrative access
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
 
 -- ==============================================================================
 -- 10. BACKFILL FOR ANY PRE-EXISTING AUTH USERS (Idempotent)
@@ -466,6 +413,7 @@ CREATE POLICY "roadmaps_own" ON public.learning_roadmaps
     WITH CHECK ((SELECT auth.uid()) = user_id);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
+GRANT ALL ON public.learning_roadmaps TO service_role;
 
 -- ==============================================================================
 -- 12. QUIZ ATTEMPTS TABLE
@@ -497,3 +445,8 @@ CREATE POLICY "quiz_own" ON public.quiz_attempts
     WITH CHECK ((SELECT auth.uid()) = user_id);
 
 GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;
+GRANT ALL ON public.quiz_attempts TO service_role;
+
+-- Final catch-all administrative grants for backend microservices
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;

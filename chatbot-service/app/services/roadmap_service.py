@@ -78,7 +78,7 @@ class RoadmapService:
             "}"
         )
 
-        user_content = f"Generate a 5-step personalized learning roadmap for Subject: '{subject}' — Topic: '{topic}'."
+        user_content = f"Generate a 5-step personalized learning roadmap strictly in valid JSON format for Subject: '{subject}' — Topic: '{topic}'."
 
         messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_content},

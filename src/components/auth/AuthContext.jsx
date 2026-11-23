@@ -30,14 +30,30 @@ export const AuthProvider = ({ children }) => {
   });
 
   // Fetch or refresh profile details from public.profiles
-  const loadProfile = useCallback(async (userId) => {
+  const loadProfile = useCallback(async (userId, fallbackUser = null) => {
     if (!userId) {
       setUserProfile(null);
       return;
     }
     try {
       const profile = await authService.getUserProfile(userId);
-      setUserProfile(profile);
+      const metaYear = fallbackUser?.user_metadata?.year_of_study;
+      if (profile) {
+        setUserProfile({
+          ...profile,
+          year_of_study: profile.year_of_study ?? metaYear ?? null,
+        });
+      } else if (fallbackUser) {
+        setUserProfile({
+          id: userId,
+          email: fallbackUser.email,
+          full_name: fallbackUser.user_metadata?.full_name || fallbackUser.user_metadata?.name || fallbackUser.email?.split('@')[0],
+          avatar_url: fallbackUser.user_metadata?.avatar_url || fallbackUser.user_metadata?.picture || '',
+          year_of_study: metaYear ?? null,
+        });
+      } else {
+        setUserProfile(profile);
+      }
     } catch (err) {
       console.warn('Failed to load profile for user:', userId, err);
     }
@@ -52,7 +68,7 @@ export const AuthProvider = ({ children }) => {
           const currentSession = await authService.getSession().catch(() => null);
           setSession(currentSession);
           setUser(verifiedUser);
-          await loadProfile(verifiedUser.id);
+          await loadProfile(verifiedUser.id, verifiedUser);
         } else {
           setSession(null);
           setUser(null);
@@ -76,7 +92,7 @@ export const AuthProvider = ({ children }) => {
         setIsPasswordRecovery(true);
       } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         if (newSession?.user?.id) {
-          await loadProfile(newSession.user.id);
+          await loadProfile(newSession.user.id, newSession.user);
         }
       } else if (event === 'SIGNED_OUT') {
         setUserProfile(null);
@@ -94,7 +110,7 @@ export const AuthProvider = ({ children }) => {
   const signIn = async (email, password) => {
     const data = await authService.signInWithEmail(email, password);
     if (data?.user?.id) {
-      await loadProfile(data.user.id);
+      await loadProfile(data.user.id, data.user);
     }
     return data;
   };
@@ -127,7 +143,7 @@ export const AuthProvider = ({ children }) => {
 
   const refreshProfile = async () => {
     if (user?.id) {
-      await loadProfile(user.id);
+      await loadProfile(user.id, user);
     }
   };
 
