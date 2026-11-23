@@ -8,6 +8,8 @@ export const Header = ({
   onToggleBookmark,
   onOpenMobileMenu,
   onOpenStudyPlan,
+  onOpenRoadmap,
+  onOpenQuiz,
 }) => {
   const [localBookmarked, setLocalBookmarked] = useState(isBookmarked);
   const [exported, setExported] = useState(false);
@@ -102,10 +104,30 @@ export const Header = ({
         <button
           type="button"
           onClick={onOpenStudyPlan}
-          className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-zinc-200/80 bg-white px-3.5 py-1.5 text-xs font-semibold text-zinc-800 shadow-2xs hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer ml-1"
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-zinc-200/80 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 shadow-2xs hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer ml-1"
         >
-          <span>Study Plan</span>
+          <span>Plan</span>
           <Sparkle size={12} weight="fill" className="text-zinc-600" />
+        </button>
+
+        {/* Practice Quiz Pill Button */}
+        <button
+          type="button"
+          onClick={onOpenQuiz}
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-zinc-200/80 bg-white px-3 py-1.5 text-xs font-semibold text-zinc-800 shadow-2xs hover:bg-zinc-50 active:scale-95 transition-all cursor-pointer"
+        >
+          <span>Quiz</span>
+          <Lightning size={12} weight="fill" className="text-zinc-600" />
+        </button>
+
+        {/* AI Learning Roadmap Button */}
+        <button
+          type="button"
+          onClick={onOpenRoadmap}
+          className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-zinc-900 bg-zinc-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-black active:scale-95 transition-all cursor-pointer"
+        >
+          <span>Roadmap</span>
+          <Sparkle size={12} weight="fill" className="text-zinc-200" />
         </button>
       </div>
     </header>

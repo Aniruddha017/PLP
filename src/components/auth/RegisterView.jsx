@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from './AuthContext';
-import { Lock, EnvelopeSimple, User, Eye, EyeSlash, CircleNotch, ArrowRight, CheckCircle } from '../icons';
+import { Lock, EnvelopeSimple, User, Eye, EyeSlash, CircleNotch, ArrowRight, CheckCircle, Books } from '../icons';
 import Logo from '../Logo';
 
 export const RegisterView = ({
@@ -13,6 +13,7 @@ export const RegisterView = ({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [yearOfStudy, setYearOfStudy] = useState('2');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +55,7 @@ export const RegisterView = ({
 
     try {
       setIsLoading(true);
-      const data = await signUp(email, password, fullName);
+      const data = await signUp(email, password, fullName, Number(yearOfStudy));
 
       // When user enumeration protection is enabled in Supabase, an existing user returns identities: []
       if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
@@ -214,6 +215,29 @@ export const RegisterView = ({
                   style={{ outline: 'none' }}
                   className="w-full pl-11 pr-4 py-3 bg-[#e6ebf2] rounded-full text-sm text-zinc-800 placeholder:text-zinc-400 border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 shadow-[inset_4px_4px_8px_#c8d0db,inset_-4px_-4px_8px_#ffffff] focus:shadow-[inset_4px_4px_8px_#c8d0db,inset_-4px_-4px_8px_#ffffff,0_0_0_1.5px_rgba(24,24,27,0.25)] transition-[box-shadow] duration-150 ease-out font-medium"
                 />
+              </div>
+            </div>
+
+            {/* Academic Year of Study (CS) */}
+            <div>
+              <label className="block text-[11px] font-bold text-zinc-600 uppercase tracking-wider mb-1.5 ml-1">
+                Computer Science Academic Year
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 group-focus-within:text-zinc-900 transition-colors">
+                  <Books size={19} weight="bold" />
+                </div>
+                <select
+                  value={yearOfStudy}
+                  onChange={(e) => setYearOfStudy(e.target.value)}
+                  disabled={isLoading}
+                  className="w-full pl-11 pr-8 py-3 bg-[#e6ebf2] rounded-full text-sm text-zinc-800 border-0 outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 shadow-[inset_4px_4px_8px_#c8d0db,inset_-4px_-4px_8px_#ffffff] focus:shadow-[inset_4px_4px_8px_#c8d0db,inset_-4px_-4px_8px_#ffffff,0_0_0_1.5px_rgba(24,24,27,0.25)] transition-[box-shadow] duration-150 ease-out font-medium cursor-pointer"
+                >
+                  <option value="1">1st Year — CS Fundamentals & Discrete Math</option>
+                  <option value="2">2nd Year — Data Structures & Algorithms</option>
+                  <option value="3">3rd Year — Operating Systems & Networks</option>
+                  <option value="4">4th Year — AI/ML & Distributed Systems</option>
+                </select>
               </div>
             </div>
 

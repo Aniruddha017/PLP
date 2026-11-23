@@ -103,8 +103,8 @@ export const AuthProvider = ({ children }) => {
     return authService.signInWithGoogle();
   };
 
-  const signUp = async (email, password, fullName = '') => {
-    return authService.signUpWithEmail(email, password, fullName);
+  const signUp = async (email, password, fullName = '', yearOfStudy = null) => {
+    return authService.signUpWithEmail(email, password, fullName, yearOfStudy);
   };
 
   const resetPassword = async (email) => {

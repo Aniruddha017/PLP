@@ -9,18 +9,22 @@ export const authService = {
    * Register a new user with email and password
    * Stores full_name in raw_user_meta_data which triggers automatic profile creation.
    */
-  async signUpWithEmail(email, password, fullName = '') {
+  async signUpWithEmail(email, password, fullName = '', yearOfStudy = null) {
     const trimmedEmail = email.trim();
     const trimmedName = fullName.trim();
+    const metaData = {
+      full_name: trimmedName,
+      name: trimmedName,
+    };
+    if (yearOfStudy) {
+      metaData.year_of_study = Number(yearOfStudy);
+    }
 
     const { data, error } = await supabase.auth.signUp({
       email: trimmedEmail,
       password,
       options: {
-        data: {
-          full_name: trimmedName,
-          name: trimmedName,
-        },
+        data: metaData,
       },
     });
 
@@ -125,7 +129,7 @@ export const authService = {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, email, full_name, avatar_url, learning_goal, created_at, updated_at')
+      .select('id, email, full_name, avatar_url, learning_goal, year_of_study, created_at, updated_at')
       .eq('id', userId)
       .maybeSingle();
 
@@ -137,7 +141,7 @@ export const authService = {
   },
 
   /**
-   * Update user profile attributes (full_name, learning_goal, avatar_url)
+   * Update user profile attributes (full_name, learning_goal, avatar_url, year_of_study)
    */
   async updateUserProfile(userId, updates) {
     if (!userId) throw new Error('User ID is required to update profile');
@@ -146,13 +150,14 @@ export const authService = {
     if (updates.full_name !== undefined) safeUpdates.full_name = updates.full_name;
     if (updates.avatar_url !== undefined) safeUpdates.avatar_url = updates.avatar_url;
     if (updates.learning_goal !== undefined) safeUpdates.learning_goal = updates.learning_goal;
+    if (updates.year_of_study !== undefined) safeUpdates.year_of_study = updates.year_of_study;
     safeUpdates.updated_at = new Date().toISOString();
 
     const { data, error } = await supabase
       .from('profiles')
       .update(safeUpdates)
       .eq('id', userId)
-      .select('id, email, full_name, avatar_url, learning_goal, created_at, updated_at')
+      .select('id, email, full_name, avatar_url, learning_goal, year_of_study, created_at, updated_at')
       .single();
 
     if (error) throw error;

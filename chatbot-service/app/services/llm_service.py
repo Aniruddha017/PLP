@@ -30,10 +30,23 @@ class LLMService:
     def generate_response(
         self,
         messages: list[ChatCompletionMessageParam],
+        json_mode: bool = False,
     ) -> str:
         client = self.client
         if not client:
             # Informative fallback if GROQ_API_KEY is not configured
+            if json_mode:
+                return (
+                    '{\n'
+                    '  "message": "Hello! I am your AI Socratic Tutor. To enable live LLaMA 3.3 generation from this microservice, please configure your GROQ_API_KEY in .env. In the meantime, consider this foundational principle: how do the initial boundary conditions relate to the core theorem?",\n'
+                    '  "cards": [\n'
+                    '    {"title": "Core Principle", "description": "Formulas and algorithms build from invariant mathematical properties.", "formula": "P(E|H) = \\\\frac{P(H \\\\cap E)}{P(E)}"},\n'
+                    '    {"title": "Algorithmic Invariant", "description": "Analyzing inductive bases reveals asymptotic limits.", "formula": "T(n) = 2T(n/2) + O(n)"}\n'
+                    '  ],\n'
+                    '  "key_insight": "Mastering Computer Science topics requires linking mathematical definitions directly to algorithmic complexity.",\n'
+                    '  "follow_up_question": "What is the primary constraint or edge case you would check first when implementing this?"\n'
+                    '}'
+                )
             return (
                 "Hello! I am your AI Socratic Tutor. "
                 "To enable live LLaMA 3.3 generation from this microservice, please add your GROQ_API_KEY to .env. "
@@ -41,15 +54,28 @@ class LLMService:
             )
 
         try:
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=messages,
-                temperature=0.7,
-                max_tokens=1024,
-            )
+            kwargs = {
+                "model": self.model,
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 1500,
+            }
+            if json_mode:
+                kwargs["response_format"] = {"type": "json_object"}
+
+            response = client.chat.completions.create(**kwargs)
             return response.choices[0].message.content or ""
         except Exception as e:
             print(f"[LLMService] Groq API call error: {e}")
+            if json_mode:
+                return (
+                    '{\n'
+                    f'  "message": "I encountered an error generating the explanation: {str(e)}",\n'
+                    '  "cards": [],\n'
+                    '  "key_insight": null,\n'
+                    '  "follow_up_question": null\n'
+                    '}'
+                )
             return f"I encountered an error generating the explanation: {str(e)}"
 
 

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Logo from '../Logo';
 import { useAuth } from '../auth/AuthContext';
 import {
@@ -23,6 +24,7 @@ export const Sidebar = ({
   onCloseMobile,
 }) => {
   const { user, userProfile } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
   const displayName = userProfile?.full_name || user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Learner';
   const displayEmail = user?.email || '';
   const avatarUrl = userProfile?.avatar_url || user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
@@ -33,6 +35,16 @@ export const Sidebar = ({
     { id: 'practice', label: 'Practice', icon: CheckCircle, href: '#practice' },
     { id: 'progress', label: 'Progress', icon: ChartLineUp, href: '#progress' },
   ];
+
+  const filteredConversations = conversations.filter((c) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (c.title || '').toLowerCase().includes(q) ||
+      (c.subject || '').toLowerCase().includes(q) ||
+      (c.topic || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <aside className="w-64 shrink-0 flex flex-col justify-between border-r border-zinc-200/80 bg-[#FAFAFA] p-4 text-left select-none h-full overflow-y-auto">
@@ -105,9 +117,26 @@ export const Sidebar = ({
 
         {/* Recent Conversations */}
         <div className="mt-6">
-          <div className="px-1 text-[11px] font-medium text-zinc-400">
-            Recent Conversations
+          <div className="flex items-center justify-between px-1 text-[11px] font-medium text-zinc-400">
+            <span>Recent Conversations</span>
+            {conversations.length > 0 && (
+              <span className="text-[10px]">{filteredConversations.length}</span>
+            )}
           </div>
+
+          {/* Quick Filter Search */}
+          {conversations.length > 3 && (
+            <div className="mt-2 px-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search topics..."
+                className="w-full px-2.5 py-1 text-[11px] bg-white border border-zinc-200/80 rounded-lg placeholder-zinc-400 text-zinc-800 outline-none focus:border-zinc-400 transition-colors"
+              />
+            </div>
+          )}
+
           <div className="mt-2 space-y-1">
             {conversations.length === 0 ? (
               <div className="px-3 py-4 rounded-xl border border-dashed border-zinc-200/90 text-center bg-white/50">
@@ -123,8 +152,10 @@ export const Sidebar = ({
                   + Start First Chat
                 </button>
               </div>
+            ) : filteredConversations.length === 0 ? (
+              <p className="text-[11px] text-zinc-400 text-center py-3">No matching topics</p>
             ) : (
-              conversations.map((chat) => {
+              filteredConversations.map((chat) => {
                 const isActive = chat.id === activeChatId;
                 return (
                   <button

@@ -44,27 +44,38 @@ async def chat(
     user_id = current_user.id if current_user else None
 
     # 1. Generate pedagogical Socratic response with full Supabase context & history
-    response_text = chat_service.generate_response(
+    response_data = chat_service.generate_response(
         user_message=request.message,
         conversation_id=request.conversation_id,
         user_id=user_id,
     )
 
-    # 2. If conversation_id is provided, persist assistant reply to public.messages
+    message_text = response_data.get("message") or ""
+    cards_list = response_data.get("cards") or []
+    key_insight = response_data.get("key_insight")
+    follow_up_question = response_data.get("follow_up_question")
+
+    # 2. If conversation_id is provided, persist assistant reply to public.messages with rich pedagogical structures
     if request.conversation_id:
         try:
             admin_client = get_supabase_admin_client()
             admin_client.table("messages").insert({
                 "conversation_id": request.conversation_id,
                 "role": "assistant",
-                "content": response_text,
+                "content": message_text,
+                "cards": cards_list,
+                "key_insight": key_insight,
+                "metadata": {
+                    "follow_up_question": follow_up_question,
+                } if follow_up_question else {},
             }).execute()
         except Exception as e:
             # Non-blocking log if DB insertion encounters issues
             print(f"[ChatRoute] Failed to record message history in Supabase: {e}")
 
     return ChatResponse(
-        message=response_text,
-        cards=[],
-        key_insight=None,
+        message=message_text,
+        cards=cards_list,
+        key_insight=key_insight,
+        follow_up_question=follow_up_question,
     )

@@ -5,6 +5,10 @@ import { Header } from './Header';
 import { ChatView } from './ChatView';
 import { InputBar } from './InputBar';
 import { StudyPlanModal } from './StudyPlanModal';
+import { RoadmapModal } from './RoadmapModal';
+import { QuizModal } from './QuizModal';
+import { SubjectsView } from './SubjectsView';
+import { ProgressView } from './ProgressView';
 import { conversationService } from '../../services/conversationService';
 import { chatbotService } from '../../services/chatbotService';
 
@@ -17,6 +21,8 @@ export const DashApp = ({ onSignOut }) => {
   const [activeNav, setActiveNav] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [studyPlanOpen, setStudyPlanOpen] = useState(false);
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   // Per-conversation message storage: { [chatId]: [ { id, role, content, created_at, cards, key_insight, feedback } ] }
   const [messagesByChat, setMessagesByChat] = useState({});
@@ -157,6 +163,7 @@ export const DashApp = ({ onSignOut }) => {
           content: apiResponse.message,
           cards: apiResponse.cards || [],
           key_insight: apiResponse.key_insight || null,
+          follow_up_question: apiResponse.follow_up_question || null,
           created_at: new Date().toISOString(),
         };
 
@@ -229,6 +236,41 @@ export const DashApp = ({ onSignOut }) => {
     }
   };
 
+  const handleSelectTopic = async (subject, topic) => {
+    if (!userId) return;
+
+    try {
+      const newConv = await conversationService.createConversation(userId, {
+        title: topic,
+        subject: subject,
+        topic: topic,
+      });
+
+      if (newConv) {
+        setConversations((prev) => [newConv, ...prev]);
+        setActiveChatId(newConv.id);
+        setActiveNav('home');
+        setMessagesByChat((prev) => ({
+          ...prev,
+          [newConv.id]: [],
+        }));
+        // Auto-request Socratic intro for the selected curriculum topic
+        handleSendMessage(`Can you explain the core concepts and fundamental principles of ${topic} in ${subject}? Please include any key formulas or asymptotic bounds and a concise takeaway.`);
+      }
+    } catch (err) {
+      console.warn('Could not launch curriculum topic conversation:', err);
+      setActiveNav('home');
+    }
+  };
+
+  const handleNavChange = (navId) => {
+    if (navId === 'practice') {
+      setQuizOpen(true);
+      return;
+    }
+    setActiveNav(navId);
+  };
+
   return (
     <div className="h-screen w-screen bg-white text-zinc-800 flex overflow-hidden font-sans select-none relative">
       {/* Desktop Sidebar */}
@@ -236,10 +278,16 @@ export const DashApp = ({ onSignOut }) => {
         <Sidebar
           activeChatId={activeChatId}
           conversations={conversations}
-          onSelectChat={setActiveChatId}
-          onNewChat={handleNewChat}
+          onSelectChat={(id) => {
+            setActiveChatId(id);
+            setActiveNav('home');
+          }}
+          onNewChat={() => {
+            handleNewChat();
+            setActiveNav('home');
+          }}
           activeNav={activeNav}
-          onNavChange={setActiveNav}
+          onNavChange={handleNavChange}
           onSignOut={handleSignOut}
         />
       </div>
@@ -257,10 +305,16 @@ export const DashApp = ({ onSignOut }) => {
             <Sidebar
               activeChatId={activeChatId}
               conversations={conversations}
-              onSelectChat={setActiveChatId}
-              onNewChat={handleNewChat}
+              onSelectChat={(id) => {
+                setActiveChatId(id);
+                setActiveNav('home');
+              }}
+              onNewChat={() => {
+                handleNewChat();
+                setActiveNav('home');
+              }}
               activeNav={activeNav}
-              onNavChange={setActiveNav}
+              onNavChange={handleNavChange}
               onSignOut={handleSignOut}
               onCloseMobile={() => setMobileMenuOpen(false)}
             />
@@ -270,28 +324,49 @@ export const DashApp = ({ onSignOut }) => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full bg-white overflow-hidden min-w-0">
-        {/* Header */}
-        <Header
-          subject={currentChat?.subject || 'AI Tutor'}
-          topic={currentChat?.topic || currentChat?.title || 'Interactive Session'}
-          isBookmarked={currentChat?.is_bookmarked ?? false}
-          onToggleBookmark={handleToggleBookmark}
-          onOpenMobileMenu={() => setMobileMenuOpen(true)}
-          onOpenStudyPlan={() => setStudyPlanOpen(true)}
-        />
+        {activeNav === 'subjects' ? (
+          <SubjectsView
+            onSelectTopic={handleSelectTopic}
+            onNewCustomChat={handleNewChat}
+          />
+        ) : activeNav === 'progress' ? (
+          <ProgressView
+            onPracticeTopic={(subject, topicName) => {
+              setQuizOpen(true);
+            }}
+            onStartChat={(subject, topicName) => {
+              handleSelectTopic(subject, topicName);
+            }}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <Header
+              subject={currentChat?.subject || 'AI Tutor'}
+              topic={currentChat?.topic || currentChat?.title || 'Interactive Session'}
+              isBookmarked={currentChat?.is_bookmarked ?? false}
+              onToggleBookmark={handleToggleBookmark}
+              onOpenMobileMenu={() => setMobileMenuOpen(true)}
+              onOpenStudyPlan={() => setStudyPlanOpen(true)}
+              onOpenRoadmap={() => setRoadmapOpen(true)}
+              onOpenQuiz={() => setQuizOpen(true)}
+            />
 
-        {/* Interactive Chat / Workbench Area */}
-        <ChatView
-          conversation={currentChat}
-          messages={currentMessages}
-          isThinking={isThinking}
-        />
+            {/* Interactive Chat / Workbench Area */}
+            <ChatView
+              conversation={currentChat}
+              messages={currentMessages}
+              isThinking={isThinking}
+              onSendMessage={handleSendMessage}
+            />
 
-        {/* Bottom Follow-Up Question Bar */}
-        <InputBar
-          onSendMessage={handleSendMessage}
-          disabled={isThinking}
-        />
+            {/* Bottom Follow-Up Question Bar */}
+            <InputBar
+              onSendMessage={handleSendMessage}
+              disabled={isThinking}
+            />
+          </>
+        )}
       </div>
 
       {/* Adaptive Study Plan Modal */}
@@ -299,6 +374,28 @@ export const DashApp = ({ onSignOut }) => {
         isOpen={studyPlanOpen}
         onClose={() => setStudyPlanOpen(false)}
         currentTopic={currentChat?.topic || 'Curriculum Overview'}
+      />
+
+      {/* AI Personalized Learning Roadmap Modal */}
+      <RoadmapModal
+        isOpen={roadmapOpen}
+        onClose={() => setRoadmapOpen(false)}
+        subject={currentChat?.subject || 'Computer Science'}
+        topic={currentChat?.topic || currentChat?.title || 'General Inquiry'}
+        conversationId={currentChat?.id}
+        onSelectPracticeProblem={(problem) =>
+          handleSendMessage(`Can you walk me through solving this practice problem step-by-step: "${problem}"?`)
+        }
+      />
+
+      {/* Adaptive Practice Quiz Modal */}
+      <QuizModal
+        isOpen={quizOpen}
+        onClose={() => setQuizOpen(false)}
+        subject={currentChat?.subject || 'Computer Science'}
+        topic={currentChat?.topic || currentChat?.title || 'General Inquiry'}
+        conversationId={currentChat?.id}
+        onAskTutor={(questionText) => handleSendMessage(questionText)}
       />
     </div>
   );
