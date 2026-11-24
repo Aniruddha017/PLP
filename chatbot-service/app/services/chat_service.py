@@ -61,7 +61,7 @@ class ChatService:
                 if user_id:
                     profile_res = (
                         db.table("profiles")
-                        .select("full_name, learning_goal, year_of_study")
+                        .select("full_name, learning_goal, year_of_study, college_name, branch, semester, programming_proficiency, learning_approach, explanation_depth, preferred_language, primary_goals, subjects_of_interest, weak_subjects, daily_learning_time")
                         .eq("id", user_id)
                         .execute()
                     )
@@ -70,12 +70,61 @@ class ChatService:
                         name = profile.get("full_name") or "Student"
                         goal = profile.get("learning_goal")
                         year = profile.get("year_of_study")
+                        college = profile.get("college_name")
+                        branch = profile.get("branch")
+                        semester = profile.get("semester")
+                        proficiency = profile.get("programming_proficiency")
+                        approach = profile.get("learning_approach")
+                        depth = profile.get("explanation_depth")
+                        language = profile.get("preferred_language")
+                        primary_goals = profile.get("primary_goals") or []
+                        weak_subjects = profile.get("weak_subjects") or []
+
+                        system_content += f"\n\n--- STUDENT ACADEMIC PROFILE & PERSONALIZATION ---"
                         system_content += f"\nStudent Name: {name}"
+                        if college:
+                            system_content += f"\nCollege/University: {college}"
+                        if branch:
+                            system_content += f"\nBranch/Department: {branch}"
                         if year:
-                            year_labels = {1: "1st Year (Freshman Fundamentals)", 2: "2nd Year (Core Data Structures & Algorithms)", 3: "3rd Year (Systems, Networks, OS, DB)", 4: "4th Year (Advanced/Capstone/Distributed Systems)"}
-                            system_content += f"\nStudent Year of Study: Year {year} - {year_labels.get(year, 'CS Undergraduate')}. Calibrate mathematical rigor and practical implementation details accordingly."
+                            year_labels = {
+                                1: "1st Year (Freshman Fundamentals)",
+                                2: "2nd Year (Core Data Structures & Algorithms)",
+                                3: "3rd Year (Systems, Networks, OS, DB)",
+                                4: "4th Year (Advanced/Capstone/Distributed Systems)"
+                            }
+                            system_content += f"\nYear of Study: Year {year} - {year_labels.get(year, 'Undergraduate')}"
+                        if semester:
+                            system_content += f"\nCurrent Semester: Semester {semester}"
+
+                        if proficiency:
+                            system_content += f"\nProgramming Proficiency: {proficiency} (Calibrate technical complexity and code implementation explanations accordingly)"
+                        if depth:
+                            system_content += f"\nPreferred Explanation Depth: {depth}"
+                        if approach:
+                            system_content += f"\nPreferred Learning Approach: {approach} (Structure answers using this style, e.g. concrete code examples, visual flow, or step-by-step logic)"
+                        if primary_goals and len(primary_goals) > 0:
+                            goals_str = ", ".join(primary_goals) if isinstance(primary_goals, list) else str(primary_goals)
+                            system_content += f"\nPrimary Student Goals: {goals_str} (Highlight patterns, exam questions, or interview applications relevant to these goals)"
+                        if weak_subjects and len(weak_subjects) > 0:
+                            weak_str = ", ".join(weak_subjects) if isinstance(weak_subjects, list) else str(weak_subjects)
+                            system_content += f"\nAreas Needing Improvement: {weak_str} (Provide extra scaffolding, foundational analogies, and step-by-step clarity if topic touches these areas)"
+
+                        if language and str(language).lower() in ("hinglish", "hindi"):
+                            if str(language).lower() == "hinglish":
+                                system_content += (
+                                    "\nPreferred Language: Hinglish. Respond in natural, conversational Hinglish "
+                                    "(a warm blend of Hindi and English natural to Indian engineering students, e.g. 'Jaise ki hum jante hain...'). "
+                                    "CRITICAL: Keep all computer science terms, code keywords, variable names, and mathematical formulas in standard English."
+                                )
+                            else:
+                                system_content += (
+                                    "\nPreferred Language: Hindi. Respond in clear Hindi, keeping code, formulas, and technical keywords in standard English."
+                                )
+                        elif language:
+                            system_content += f"\nPreferred Language: {language}"
                         if goal:
-                            system_content += f"\nStudent Learning Goal: {goal}"
+                            system_content += f"\nSpecific Learning Goal: {goal}"
 
                 # C. Retrieve the last 8 messages in this thread for conversational memory
                 msg_res = (

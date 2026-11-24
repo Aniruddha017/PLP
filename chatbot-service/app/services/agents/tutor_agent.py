@@ -20,6 +20,7 @@ class DocumentTutorAgent:
         document_meta: dict[str, Any],
         chunks: list[dict[str, Any]],
         chat_history: list[dict[str, str]] | None = None,
+        student_profile: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         doc_name = document_meta.get("filename", "Uploaded Document")
         subject = document_meta.get("detected_subject", "Computer Science")
@@ -56,6 +57,27 @@ class DocumentTutorAgent:
 
         grounded_context = "\n\n".join(context_blocks)
 
+        profile_instructions = ""
+        if student_profile:
+            pref_lang = student_profile.get("preferred_language")
+            if pref_lang and str(pref_lang).lower() in ("hinglish", "hindi"):
+                if str(pref_lang).lower() == "hinglish":
+                    profile_instructions += (
+                        "\nLANGUAGE PREFERENCE: Hinglish. Explain concepts in natural, conversational Hinglish "
+                        "(blend of Hindi and English natural to Indian engineering students). "
+                        "Keep all document citations, technical keywords, code, and formulas in standard English."
+                    )
+                else:
+                    profile_instructions += (
+                        "\nLANGUAGE PREFERENCE: Hindi. Explain concepts in clear Hindi, keeping citations, technical terms, and formulas in standard English."
+                    )
+            depth = student_profile.get("explanation_depth")
+            if depth:
+                profile_instructions += f"\nEXPLANATION DEPTH: {depth}."
+            approach = student_profile.get("learning_approach")
+            if approach:
+                profile_instructions += f"\nLEARNING STYLE: Emphasize {approach}."
+
         system_prompt = (
             f"You are an empathetic, world-class University Professor and AI Tutor specializing in {subject}.\n"
             f"You are tutoring a student using their uploaded course document: '{doc_name}'.\n\n"
@@ -64,7 +86,8 @@ class DocumentTutorAgent:
             "2. Whenever stating a fact, theorem, or algorithm property, explicitly cite the page (e.g. '[Page 4, §B-Tree]').\n"
             "3. Explain complex computational and mathematical ideas in intuitive, step-by-step language with examples.\n"
             "4. If the provided document does NOT contain enough context to answer, state this honestly instead of inventing details.\n"
-            "5. Format mathematical equations cleanly using LaTeX syntax ($...$ or $$...$$).\n\n"
+            "5. Format mathematical equations cleanly using LaTeX syntax ($...$ or $$...$$).\n"
+            f"{profile_instructions}\n\n"
             "CRITICAL: Respond STRICTLY in valid JSON matching this schema:\n"
             "{\n"
             '  "answer": "Comprehensive, encouraging, step-by-step explanation referencing page citations.",\n'

@@ -10,6 +10,7 @@ import { AuthProvider, useAuth } from './components/auth/AuthContext';
 import { LoginView } from './components/auth/LoginView';
 import { RegisterView } from './components/auth/RegisterView';
 import { ForgotPasswordView } from './components/auth/ForgotPasswordView';
+import { OnboardingView } from './components/auth/OnboardingView';
 import { DashApp } from './components/dash-app/DashApp';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
@@ -72,6 +73,13 @@ function resolveRoute() {
     return { page: 'forgot-password', section: null };
   }
 
+  if (pathname === '/onboarding' || hash === '#onboarding') {
+    if (window.location.hash || pathname !== '/onboarding') {
+      window.history.replaceState(null, '', '/onboarding');
+    }
+    return { page: 'onboarding', section: null };
+  }
+
   if (pathname === '/app' || pathname.startsWith('/app/')) {
     return { page: 'app', section: null };
   }
@@ -102,7 +110,7 @@ function resolveRoute() {
 function AppContent() {
   const lenisRef = useRef(null);
   const [route, setRoute] = useState(resolveRoute);
-  const { user, loading, signOut } = useAuth();
+  const { user, userProfile, loading, signOut } = useAuth();
 
   const navigate = (toPath) => {
     window.history.pushState(null, '', toPath);
@@ -113,21 +121,32 @@ function AppContent() {
   // Resolved active page accounting for route guards without cascading renders
   const activePage = (() => {
     if (loading) return route.page;
-    if (route.page === 'app' && !user) return 'login';
-    if (user && (route.page === 'login' || route.page === 'register')) return 'app';
+    if (!user && (route.page === 'app' || route.page === 'onboarding')) return 'login';
+    if (user) {
+      const isOnboardingDone = Boolean(userProfile?.onboarding_completed);
+      if (route.page === 'app' && !isOnboardingDone) return 'onboarding';
+      if (route.page === 'login' || route.page === 'register') {
+        return isOnboardingDone ? 'app' : 'onboarding';
+      }
+    }
     return route.page;
   })();
 
   // Synchronize URL history with guarded route
   useEffect(() => {
     if (!loading) {
-      if (route.page === 'app' && !user) {
+      if (!user && (route.page === 'app' || route.page === 'onboarding')) {
         window.history.replaceState(null, '', '/login');
-      } else if (user && (route.page === 'login' || route.page === 'register')) {
-        window.history.replaceState(null, '', '/app');
+      } else if (user) {
+        const isOnboardingDone = Boolean(userProfile?.onboarding_completed);
+        if (route.page === 'app' && !isOnboardingDone) {
+          window.history.replaceState(null, '', '/onboarding');
+        } else if (route.page === 'login' || route.page === 'register') {
+          window.history.replaceState(null, '', isOnboardingDone ? '/app' : '/onboarding');
+        }
       }
     }
-  }, [route.page, user, loading]);
+  }, [route.page, user, userProfile, loading]);
 
   // Sync route on browser popstate and hashchange
   useEffect(() => {
@@ -331,7 +350,14 @@ function AppContent() {
         />
       )}
 
-      {/* 5. Learning App Console (/app) */}
+      {/* 5. Onboarding Page (/onboarding) */}
+      {activePage === 'onboarding' && (
+        <OnboardingView
+          onComplete={() => navigate('/app')}
+        />
+      )}
+
+      {/* 6. Learning App Console (/app) */}
       {activePage === 'app' && (
         loading ? (
           <div className="min-h-screen w-full bg-[#f0f2f5] text-zinc-900 flex flex-col items-center justify-center p-6 relative select-none">

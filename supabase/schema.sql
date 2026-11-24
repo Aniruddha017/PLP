@@ -19,12 +19,36 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     avatar_url TEXT,
     learning_goal TEXT,
     year_of_study SMALLINT CHECK (year_of_study BETWEEN 1 AND 4),
+    college_name TEXT,
+    branch TEXT,
+    semester SMALLINT CHECK (semester BETWEEN 1 AND 8),
+    programming_proficiency TEXT DEFAULT 'Beginner',
+    learning_approach TEXT DEFAULT 'Step-by-step explanations',
+    explanation_depth TEXT DEFAULT 'Balanced',
+    preferred_language TEXT DEFAULT 'English',
+    primary_goals JSONB DEFAULT '[]'::jsonb,
+    subjects_of_interest JSONB DEFAULT '[]'::jsonb,
+    weak_subjects JSONB DEFAULT '[]'::jsonb,
+    daily_learning_time TEXT DEFAULT '1-2 hours',
+    onboarding_completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 -- Idempotent column additions/cleanups if migrating from previous draft
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS year_of_study SMALLINT CHECK (year_of_study BETWEEN 1 AND 4);
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS college_name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS branch TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS semester SMALLINT CHECK (semester BETWEEN 1 AND 8);
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS programming_proficiency TEXT DEFAULT 'Beginner';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS learning_approach TEXT DEFAULT 'Step-by-step explanations';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS explanation_depth TEXT DEFAULT 'Balanced';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS preferred_language TEXT DEFAULT 'English';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS primary_goals JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS subjects_of_interest JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS weak_subjects JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS daily_learning_time TEXT DEFAULT '1-2 hours';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS onboarding_completed BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS tier;
 ALTER TABLE public.profiles DROP COLUMN IF EXISTS stripe_customer_id;
 
@@ -344,8 +368,6 @@ GRANT SELECT, UPDATE ON public.profiles TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.conversations TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.messages TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.student_topic_mastery TO authenticated;
-GRANT SELECT, INSERT, UPDATE, DELETE ON public.learning_roadmaps TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.quiz_attempts TO authenticated;
 
 -- Allow backend microservice (service_role) full administrative access
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;

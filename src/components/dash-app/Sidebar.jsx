@@ -12,6 +12,7 @@ import {
   SignOut,
   X,
   FileText,
+  Gear,
 } from '../icons';
 
 export const Sidebar = ({
@@ -23,6 +24,7 @@ export const Sidebar = ({
   onNavChange,
   onSignOut,
   onCloseMobile,
+  onOpenProfile,
 }) => {
   const { user, userProfile } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
@@ -198,7 +200,12 @@ export const Sidebar = ({
       <div className="mt-6 space-y-3 pt-2">
         {/* User Profile Info */}
         {user && (
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-zinc-200/80 shadow-2xs">
+          <button
+            type="button"
+            onClick={onOpenProfile}
+            title="Manage Profile & Learning Preferences"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white border border-zinc-200/80 shadow-2xs w-full text-left hover:border-zinc-300 hover:bg-zinc-50 transition-colors group cursor-pointer"
+          >
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -214,7 +221,8 @@ export const Sidebar = ({
               <div className="text-xs font-semibold text-zinc-900 truncate">{displayName}</div>
               <div className="text-[10px] text-zinc-400 truncate">{displayEmail}</div>
             </div>
-          </div>
+            <Gear size={14} className="text-zinc-400 group-hover:text-zinc-800 transition-colors shrink-0" />
+          </button>
         )}
 
         {/* User Sign Out button */}

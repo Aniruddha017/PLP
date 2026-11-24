@@ -60,11 +60,24 @@ def retriever_node(state: AgentState) -> dict[str, Any]:
 
 def tutor_node(state: AgentState) -> dict[str, Any]:
     """Executes the Document Tutor Agent."""
+    student_profile = state.get("extra_params", {}).get("student_profile")
+    if not student_profile and state.get("user_id"):
+        try:
+            from app.db.supabase import get_supabase_admin_client
+            db = get_supabase_admin_client()
+            if db:
+                p_res = db.table("profiles").select("preferred_language, explanation_depth, learning_approach").eq("id", state["user_id"]).execute()
+                if p_res.data:
+                    student_profile = p_res.data[0]
+        except Exception:
+            pass
+
     res = tutor_agent.answer_question(
         question=state.get("query", ""),
         document_meta=state.get("document_meta", {}),
         chunks=state.get("retrieved_chunks", []),
         chat_history=state.get("chat_history", []),
+        student_profile=student_profile,
     )
     return {"result": res}
 

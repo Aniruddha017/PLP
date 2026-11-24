@@ -14,6 +14,7 @@ export const AuthContext = createContext({
   signInWithGoogle: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
+  updateProfile: async () => {},
   setIsPasswordRecovery: () => {},
 });
 
@@ -147,6 +148,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (updates) => {
+    if (!user?.id) throw new Error('Not authenticated');
+    const updated = await authService.updateUserProfile(user.id, updates);
+    setUserProfile((prev) => ({ ...(prev || {}), ...updated }));
+    return updated;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -163,6 +171,7 @@ export const AuthProvider = ({ children }) => {
         signInWithGoogle,
         signOut,
         refreshProfile,
+        updateProfile,
       }}
     >
       {children}

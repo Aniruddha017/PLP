@@ -7,6 +7,7 @@ import { InputBar } from './InputBar';
 import { StudyPlanModal } from './StudyPlanModal';
 import { RoadmapModal } from './RoadmapModal';
 import { QuizModal } from './QuizModal';
+import { ProfileModal } from './ProfileModal';
 import { SubjectsView } from './SubjectsView';
 import { ProgressView } from './ProgressView';
 import { DocLearningView } from './DocLearningView';
@@ -24,6 +25,7 @@ export const DashApp = ({ onSignOut }) => {
   const [studyPlanOpen, setStudyPlanOpen] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   // Per-conversation message storage: { [chatId]: [ { id, role, content, created_at, cards, key_insight, feedback } ] }
   const [messagesByChat, setMessagesByChat] = useState({});
@@ -290,6 +292,7 @@ export const DashApp = ({ onSignOut }) => {
           activeNav={activeNav}
           onNavChange={handleNavChange}
           onSignOut={handleSignOut}
+          onOpenProfile={() => setProfileOpen(true)}
         />
       </div>
 
@@ -318,6 +321,10 @@ export const DashApp = ({ onSignOut }) => {
               onNavChange={handleNavChange}
               onSignOut={handleSignOut}
               onCloseMobile={() => setMobileMenuOpen(false)}
+              onOpenProfile={() => {
+                setMobileMenuOpen(false);
+                setProfileOpen(true);
+              }}
             />
           </div>
         </div>
@@ -399,6 +406,16 @@ export const DashApp = ({ onSignOut }) => {
         topic={currentChat?.topic || currentChat?.title || 'General Inquiry'}
         conversationId={currentChat?.id}
         onAskTutor={(questionText) => handleSendMessage(questionText)}
+      />
+
+      {/* Student Profile & Learning Preferences Management Modal */}
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        onRetakeOnboarding={() => {
+          setProfileOpen(false);
+          window.location.href = '/onboarding';
+        }}
       />
     </div>
   );
