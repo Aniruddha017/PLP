@@ -186,14 +186,17 @@ class TimetableService:
             f"}}"
         )
 
-        user_prompt = f"Construct the personalized weekly study timetable for {timetable_title}."
+        user_prompt = (
+            f"Construct the personalized weekly study timetable for {timetable_title}. "
+            "Output your response strictly as a single valid JSON object following the required schema, with no surrounding text."
+        )
 
         messages: list[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
 
-        raw_output = llm_service.generate_response(messages, json_mode=True)
+        raw_output = llm_service.generate_response(messages, json_mode=True, max_tokens=3000)
         schedule = []
 
         try:

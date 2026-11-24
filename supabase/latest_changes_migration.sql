@@ -7,9 +7,10 @@
 --   1. "column profiles.year_of_study does not exist"
 --   2. "Could not find the table 'public.quiz_attempts' in the schema cache" (PGRST205)
 --   3. "Could not find the table 'public.learning_roadmaps' in the schema cache" (PGRST205)
---   4. "permission denied for table conversations / messages" (Error 42501 for service_role)
---   5. Agentic AI Document Learning tables (pgvector, student_documents, document_chunks)
---   6. Personalized Learning Onboarding & Profile preferences columns
+--   4. "Could not find the table 'public.student_timetables' in the schema cache" (PGRST205)
+--   5. "permission denied for table conversations / messages" (Error 42501 for service_role)
+--   6. Agentic AI Document Learning tables (pgvector, student_documents, document_chunks)
+--   7. Personalized Learning Onboarding & Profile preferences columns
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
@@ -194,7 +195,44 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.document_chunks TO authenticated;
 GRANT EXECUTE ON FUNCTION match_document_chunks(vector(384), UUID, UUID, INT) TO authenticated, service_role;
 
 -- ------------------------------------------------------------------------------
--- 5. FIX PERMISSION DENIED (42501) FOR SERVICE ROLE ON CONVERSATIONS & MESSAGES
+-- 5. AI STUDY TIMETABLE SCHEDULER (Fixes PGRST205 for student_timetables)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.student_timetables (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    schedule JSONB NOT NULL DEFAULT '[]'::jsonb,
+    generation_context JSONB DEFAULT '{}'::jsonb,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_timetables_user ON public.student_timetables(user_id);
+CREATE INDEX IF NOT EXISTS idx_timetables_user_active ON public.student_timetables(user_id, is_active);
+
+-- Automatic updated_at trigger
+DROP TRIGGER IF EXISTS trg_timetables_updated_at ON public.student_timetables;
+CREATE TRIGGER trg_timetables_updated_at
+    BEFORE UPDATE ON public.student_timetables
+    FOR EACH ROW
+    EXECUTE FUNCTION public.set_updated_at_timestamp();
+
+-- Row Level Security (RLS)
+ALTER TABLE public.student_timetables ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "timetables_own" ON public.student_timetables;
+CREATE POLICY "timetables_own" ON public.student_timetables
+    FOR ALL
+    TO authenticated
+    USING ((SELECT auth.uid()) = user_id)
+    WITH CHECK ((SELECT auth.uid()) = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.student_timetables TO authenticated;
+GRANT ALL ON public.student_timetables TO service_role;
+
+-- ------------------------------------------------------------------------------
+-- 6. FIX PERMISSION DENIED (42501) FOR SERVICE ROLE ON CONVERSATIONS & MESSAGES
 -- ------------------------------------------------------------------------------
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT SELECT, UPDATE ON public.profiles TO authenticated;
@@ -202,13 +240,13 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON public.conversations TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.messages TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.student_topic_mastery TO authenticated;
 
--- Full administrative privileges for backend microservice
+-- Full administrative privileges for backend microservices
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
 
 -- ------------------------------------------------------------------------------
--- 6. RELOAD SCHEMA CACHE
+-- 7. RELOAD SCHEMA CACHE
 -- ------------------------------------------------------------------------------
 NOTIFY pgrst, 'reload schema';

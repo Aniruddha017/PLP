@@ -32,6 +32,7 @@ class LLMService:
         self,
         messages: list[ChatCompletionMessageParam],
         json_mode: bool = False,
+        max_tokens: int = 3000,
     ) -> str:
         client = self.client
         if not client:
@@ -50,7 +51,7 @@ class LLMService:
                 )
             return (
                 "Hello! I am your AI Socratic Tutor. "
-                "To enable live (changed to openai api from groq) LLaMA 3.3 generation from this microservice, please add your GROQ_API_KEY to .env. "
+                "To enable live LLaMA 3.3 generation from this microservice, please add your GROQ_API_KEY to .env. "
                 "In the meantime, consider this foundational principle: how do the initial boundary conditions relate to the core theorem?"
             )
 
@@ -59,7 +60,7 @@ class LLMService:
                 "model": self.model,
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 1500,
+                "max_tokens": max_tokens,
             }
             if json_mode:
                 kwargs["response_format"] = {"type": "json_object"}
@@ -68,6 +69,21 @@ class LLMService:
             return response.choices[0].message.content or ""
         except Exception as e:
             print(f"[LLMService] Groq API call error: {e}")
+            # If Groq schema validation failed, retry once without json_object constraint
+            if json_mode and "json_validate_failed" in str(e).lower():
+                try:
+                    print("[LLMService] Retrying generation without strict JSON mode constraint...")
+                    retry_kwargs = {
+                        "model": self.model,
+                        "messages": messages,
+                        "temperature": 0.5,
+                        "max_tokens": max_tokens,
+                    }
+                    retry_res = client.chat.completions.create(**retry_kwargs)
+                    return retry_res.choices[0].message.content or ""
+                except Exception as retry_err:
+                    print(f"[LLMService] Groq retry error: {retry_err}")
+
             if json_mode:
                 return json.dumps({
                     "message": f"I encountered an error generating the response: {str(e)}",
