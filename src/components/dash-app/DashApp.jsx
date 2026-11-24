@@ -11,6 +11,7 @@ import { ProfileModal } from './ProfileModal';
 import { SubjectsView } from './SubjectsView';
 import { ProgressView } from './ProgressView';
 import { DocLearningView } from './DocLearningView';
+import { TimetableView } from './TimetableView';
 import { conversationService } from '../../services/conversationService';
 import { chatbotService } from '../../services/chatbotService';
 
@@ -348,6 +349,14 @@ export const DashApp = ({ onSignOut }) => {
           />
         ) : activeNav === 'doc-learning' ? (
           <DocLearningView />
+        ) : activeNav === 'timetable' ? (
+          <TimetableView
+            onStartChat={(subject, topic) => handleSelectTopic(subject, topic)}
+            onOpenQuiz={(subject, topic) => {
+              setQuizOpen(true);
+            }}
+            onOpenProfile={() => setProfileOpen(true)}
+          />
         ) : (
           <>
             {/* Header */}
