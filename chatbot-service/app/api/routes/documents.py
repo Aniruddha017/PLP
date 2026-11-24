@@ -3,6 +3,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Header, UploadFile, status
 from pydantic import BaseModel, Field
 
+from app.core.config import get_settings
 from app.db.supabase import get_supabase_client, get_supabase_admin_client
 from app.services.document_parser import document_parser
 from app.services.embedding_service import embedding_service
@@ -35,22 +36,48 @@ class QuizEvaluateRequest(BaseModel):
 # --- Helper: Authentication ---
 async def get_current_user_id(authorization: str | None = Header(None)) -> str:
     """
-    Extracts authenticated user ID from Supabase JWT token.
-    Falls back to a guest UUID if unauthenticated in dev/demo mode.
+    Extracts and validates authenticated user ID from Supabase JWT token.
+    Rejects missing, invalid, or expired tokens with HTTP 401.
+    Demo mode is explicitly gated and only accessible if debug mode is active and no token is passed.
     """
-    if authorization:
-        token = authorization.replace("Bearer ", "").strip()
-        if token:
-            try:
-                client = get_supabase_client()
-                user_res = client.auth.get_user(token)
-                if user_res and user_res.user:
-                    return user_res.user.id
-            except Exception as e:
-                print(f"[DocumentsRoute] Auth token verification error: {e}")
+    if not authorization:
+        settings = get_settings()
+        if bool(settings.debug):
+            return "00000000-0000-0000-0000-000000000001"
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication token required.",
+        )
 
-    # Fallback to demo user ID so the feature is immediately testable without strict tokens
-    return "00000000-0000-0000-0000-000000000001"
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization scheme. Expected 'Bearer <token>'.",
+        )
+
+    token = authorization.replace("Bearer ", "").strip()
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing Bearer authentication token.",
+        )
+
+    try:
+        client = get_supabase_client()
+        user_res = client.auth.get_user(token)
+        if user_res and user_res.user:
+            return user_res.user.id
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found for provided token.",
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid or expired authentication token: {str(e)}",
+        )
 
 
 # --- Endpoints ---
@@ -189,6 +216,7 @@ async def get_document(document_id: str, user_id: str = Depends(get_current_user
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
@@ -197,13 +225,10 @@ async def get_document(document_id: str, user_id: str = Depends(get_current_user
     except Exception as e:
         print(f"[DocumentsRoute] Get document warning: {e}")
 
-    return {
-        "id": document_id,
-        "filename": "Course Document",
-        "detected_subject": "Computer Science",
-        "page_count": 1,
-        "summary": "Academic reference document.",
-    }
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Document not found.",
+    )
 
 
 @router.post("/{document_id}/chat")
@@ -216,7 +241,7 @@ async def chat_with_document(
     Document Tutor Agent: Answers student questions strictly grounded in
     retrieved document chunks with page citations.
     """
-    # Fetch doc metadata
+    # Fetch doc metadata scoped to the authenticated user
     admin_client = get_supabase_admin_client()
     doc_meta = {}
     try:
@@ -224,11 +249,19 @@ async def chat_with_document(
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
         if d_res.data:
             doc_meta = d_res.data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found.",
+            )
+    except HTTPException:
+        raise
     except Exception:
         pass
 
@@ -264,11 +297,19 @@ async def get_document_summary(
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
         if d_res.data:
             doc_meta = d_res.data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found.",
+            )
+    except HTTPException:
+        raise
     except Exception:
         pass
 
@@ -304,11 +345,19 @@ async def generate_document_questions(
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
         if d_res.data:
             doc_meta = d_res.data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found.",
+            )
+    except HTTPException:
+        raise
     except Exception:
         pass
 
@@ -347,11 +396,19 @@ async def generate_document_quiz(
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
         if d_res.data:
             doc_meta = d_res.data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found.",
+            )
+    except HTTPException:
+        raise
     except Exception:
         pass
 
@@ -389,11 +446,19 @@ async def evaluate_document_quiz(
             admin_client.table("student_documents")
             .select("*")
             .eq("id", document_id)
+            .eq("user_id", user_id)
             .maybe_single()
             .execute()
         )
         if d_res.data:
             doc_meta = d_res.data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found.",
+            )
+    except HTTPException:
+        raise
     except Exception:
         pass
 
@@ -424,8 +489,18 @@ async def delete_document(
     """Deletes a document and cascades deletion of its vector chunks."""
     admin_client = get_supabase_admin_client()
     try:
-        admin_client.table("student_documents").delete().eq("id", document_id).eq("user_id", user_id).execute()
+        res = admin_client.table("student_documents").delete().eq("id", document_id).eq("user_id", user_id).execute()
+        if not res.data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found or you do not have permission to delete it.",
+            )
         return {"success": True, "message": "Document deleted successfully."}
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"[DocumentsRoute] Delete document error: {e}")
-        return {"success": True}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete document.",
+        )

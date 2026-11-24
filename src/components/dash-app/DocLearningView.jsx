@@ -142,7 +142,7 @@ export const DocLearningView = () => {
       const remaining = documents.filter((d) => d.id !== docId);
       setDocuments(remaining);
       if (selectedDocId === docId) {
-        setSelectedDocId(remaining.length > 0 ? remaining[0].id : null);
+        handleSelectDocument(remaining.length > 0 ? remaining[0].id : null);
       }
     } catch (err) {
       console.error('Delete failed:', err);
@@ -168,7 +168,9 @@ export const DocLearningView = () => {
       const res = await docLearningService.chatWithDocument({
         documentId: selectedDocId,
         message: text.trim(),
-        chatHistory: chatMessages.slice(-4),
+        chatHistory: chatMessages.slice(-4).map(({ role, content }) => ({
+          role, content
+        })),
       });
 
       const assistantMsg = {

@@ -68,6 +68,12 @@ SECURITY DEFINER
 SET search_path = public, extensions, pg_temp
 AS $$
 BEGIN
+    -- Enforce ownership: authenticated callers can only query their own chunks.
+    -- The service_role bypasses this check (used by the backend admin client).
+    IF (auth.role() <> 'service_role') AND (auth.uid() IS DISTINCT FROM filter_user_id) THEN
+        RAISE EXCEPTION 'Permission denied: filter_user_id does not match authenticated user';
+    END IF;
+
     RETURN QUERY
     SELECT
         dc.id,
