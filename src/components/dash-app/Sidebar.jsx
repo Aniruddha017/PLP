@@ -11,6 +11,7 @@ import {
   DotsThree,
   SignOut,
   X,
+  FileText,
 } from '../icons';
 
 export const Sidebar = ({
@@ -31,6 +32,7 @@ export const Sidebar = ({
 
   const navItems = [
     { id: 'home', label: 'Home', icon: House, href: '/' },
+    { id: 'doc-learning', label: 'Doc Learning', icon: FileText, href: '#doc-learning' },
     { id: 'subjects', label: 'Subjects', icon: Books, href: '#subjects' },
     { id: 'practice', label: 'Practice', icon: CheckCircle, href: '#practice' },
     { id: 'progress', label: 'Progress', icon: ChartLineUp, href: '#progress' },

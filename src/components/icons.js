@@ -105,6 +105,8 @@ export { Ticket } from '@phosphor-icons/react/dist/icons/Ticket';
 export { Tooth } from '@phosphor-icons/react/dist/icons/Tooth';
 export { TrendUp } from '@phosphor-icons/react/dist/icons/TrendUp';
 export { TwitterLogo } from '@phosphor-icons/react/dist/icons/TwitterLogo';
+export { Trash } from '@phosphor-icons/react/dist/icons/Trash';
+export { UploadSimple } from '@phosphor-icons/react/dist/icons/UploadSimple';
 export { User } from '@phosphor-icons/react/dist/icons/User';
 export { UserCheck } from '@phosphor-icons/react/dist/icons/UserCheck';
 export { UserCircle } from '@phosphor-icons/react/dist/icons/UserCircle';
