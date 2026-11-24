@@ -253,9 +253,15 @@ class DocumentParserService:
                             },
                         })
                         global_chunk_idx += 1
-                        # Retain overlap from end of current_chunk
+                        # Retain overlap from end of current_chunk, but cap new chunk to chunk_size
                         overlap_start = max(0, len(current_chunk) - chunk_overlap)
-                        current_chunk = f"{current_chunk[overlap_start:]}\n{para}".strip()
+                        overlap_text = current_chunk[overlap_start:]
+                        # If the paragraph itself fits with the overlap, combine them;
+                        # otherwise start fresh with just the paragraph to avoid oversized chunks
+                        if len(overlap_text) + 1 + len(para) <= chunk_size:
+                            current_chunk = f"{overlap_text}\n{para}".strip()
+                        else:
+                            current_chunk = para
                     else:
                         # Para itself is longer than chunk_size, split by characters
                         for i in range(0, len(para), chunk_size - chunk_overlap):

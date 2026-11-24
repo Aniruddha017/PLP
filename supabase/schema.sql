@@ -486,6 +486,11 @@ CREATE TABLE IF NOT EXISTS public.document_chunks (
 CREATE INDEX IF NOT EXISTS idx_chunks_doc_id ON public.document_chunks(document_id);
 CREATE INDEX IF NOT EXISTS idx_chunks_user_id ON public.document_chunks(user_id);
 
+-- Vector similarity index using IVFFlat
+CREATE INDEX IF NOT EXISTS idx_document_chunks_embedding
+    ON public.document_chunks USING ivfflat (embedding vector_cosine_ops)
+    WITH (lists = 100);
+
 CREATE OR REPLACE FUNCTION match_document_chunks (
     query_embedding vector(384),
     filter_document_id UUID,
@@ -505,6 +510,12 @@ SECURITY DEFINER
 SET search_path = public, extensions, pg_temp
 AS $$
 BEGIN
+    -- Enforce ownership: authenticated callers can only query their own chunks.
+    -- The service_role bypasses this check (used by the backend admin client).
+    IF (auth.role() <> 'service_role') AND (auth.uid() IS DISTINCT FROM filter_user_id) THEN
+        RAISE EXCEPTION 'Permission denied: filter_user_id does not match authenticated user';
+    END IF;
+
     RETURN QUERY
     SELECT
         dc.id,

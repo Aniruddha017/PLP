@@ -115,6 +115,7 @@ class EmbeddingService:
                 admin_client.table("document_chunks")
                 .select("id, document_id, content, page_number, heading")
                 .eq("document_id", document_id)
+                .eq("user_id", user_id)
                 .order("chunk_index")
                 .limit(match_count)
                 .execute()
