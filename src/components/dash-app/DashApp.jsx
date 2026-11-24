@@ -9,6 +9,7 @@ import { RoadmapModal } from './RoadmapModal';
 import { QuizModal } from './QuizModal';
 import { SubjectsView } from './SubjectsView';
 import { ProgressView } from './ProgressView';
+import { DocLearningView } from './DocLearningView';
 import { conversationService } from '../../services/conversationService';
 import { chatbotService } from '../../services/chatbotService';
 
@@ -338,6 +339,8 @@ export const DashApp = ({ onSignOut }) => {
               handleSelectTopic(subject, topicName);
             }}
           />
+        ) : activeNav === 'doc-learning' ? (
+          <DocLearningView />
         ) : (
           <>
             {/* Header */}

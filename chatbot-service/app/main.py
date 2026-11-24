@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.chat import router as chat_router
 from app.api.routes.roadmap import router as roadmap_router
 from app.api.routes.quiz import router as quiz_router
+from app.api.routes.documents import router as documents_router
 
 
 app = FastAPI(
@@ -50,5 +51,10 @@ app.include_router(
 
 app.include_router(
     quiz_router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    documents_router,
     prefix="/api/v1",
 )
