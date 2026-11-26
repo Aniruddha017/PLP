@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import {
   GraduationCap,
@@ -104,17 +104,35 @@ const TIME_OPTIONS = [
 ];
 
 export const OnboardingView = ({ onComplete }) => {
-  const { userProfile, updateProfile } = useAuth();
+  const { user, userProfile, updateProfile } = useAuth();
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // If the user has already completed onboarding, redirect them directly to /app
+  useEffect(() => {
+    const isDone = Boolean(
+      userProfile?.onboarding_completed ||
+      (userProfile?.branch && userProfile?.semester) ||
+      (user?.id && typeof window !== 'undefined' && localStorage.getItem(`onboarding_completed_${user.id}`) === 'true')
+    );
+    if (isDone && onComplete) {
+      onComplete();
+    }
+  }, [userProfile, user, onComplete]);
+
   // Form State initialized from existing user profile if available
   const [collegeName, setCollegeName] = useState(userProfile?.college_name || 'Kamla Nehru Institute of Technology (KNIT Sultanpur)');
   const [branch, setBranch] = useState(userProfile?.branch || 'Computer Science & Engineering (CSE)');
   const [yearOfStudy, setYearOfStudy] = useState(userProfile?.year_of_study || 2);
-  const [semester, setSemester] = useState(userProfile?.semester || 4);
+  const [semester, setSemester] = useState(() => {
+    const initialYear = userProfile?.year_of_study || 2;
+    const initialSem = userProfile?.semester || 4;
+    const minSem = initialYear * 2 - 1;
+    const maxSem = initialYear * 2;
+    return initialSem >= minSem && initialSem <= maxSem ? initialSem : minSem;
+  });
 
   const [preferredLanguage, setPreferredLanguage] = useState(userProfile?.preferred_language || 'English');
   const [programmingProficiency, setProgrammingProficiency] = useState(userProfile?.programming_proficiency || 'Beginner');
@@ -191,6 +209,9 @@ export const OnboardingView = ({ onComplete }) => {
       };
 
       await updateProfile(payload);
+      if (user?.id && typeof window !== 'undefined') {
+        localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+      }
       if (onComplete) {
         onComplete();
       }
@@ -339,12 +360,17 @@ export const OnboardingView = ({ onComplete }) => {
                         key={y.value}
                         type="button"
                         onClick={() => {
-                          setYearOfStudy(y.value);
-                          setSemester(y.value * 2);
+                          const newYear = y.value;
+                          setYearOfStudy(newYear);
+                          const minSem = newYear * 2 - 1;
+                          const maxSem = newYear * 2;
+                          if (semester < minSem || semester > maxSem) {
+                            setSemester(minSem);
+                          }
                         }}
-                        className={`p-3 rounded-xl border text-left transition-all ${
+                        className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                           yearOfStudy === y.value
-                            ? 'border-white bg-zinc-800/90 text-white shadow-sm'
+                            ? 'border-white bg-zinc-800/90 text-white shadow-sm ring-1 ring-white/20'
                             : 'border-zinc-800/80 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700'
                         }`}
                       >
@@ -357,24 +383,41 @@ export const OnboardingView = ({ onComplete }) => {
 
                 {/* Current Semester */}
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                    Current Semester <span className="text-red-400">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+                      Current Semester <span className="text-red-400">*</span>
+                    </label>
+                    <span className="text-[11px] text-zinc-400 font-medium">
+                      (Sem {yearOfStudy * 2 - 1} or {yearOfStudy * 2} for Year {yearOfStudy})
+                    </span>
+                  </div>
                   <div className="grid grid-cols-4 gap-2">
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                      <button
-                        key={sem}
-                        type="button"
-                        onClick={() => setSemester(sem)}
-                        className={`py-3 rounded-xl border text-center font-bold text-sm transition-all ${
-                          semester === sem
-                            ? 'border-white bg-white text-black'
-                            : 'border-zinc-800/80 bg-zinc-950/60 text-zinc-400 hover:border-zinc-700'
-                        }`}
-                      >
-                        Sem {sem}
-                      </button>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => {
+                      const minSem = yearOfStudy * 2 - 1;
+                      const maxSem = yearOfStudy * 2;
+                      const isAllowed = sem >= minSem && sem <= maxSem;
+
+                      return (
+                        <button
+                          key={sem}
+                          type="button"
+                          disabled={!isAllowed}
+                          onClick={() => {
+                            if (isAllowed) setSemester(sem);
+                          }}
+                          title={!isAllowed ? `Semester ${sem} is not valid for Year ${yearOfStudy}` : `Semester ${sem}`}
+                          className={`py-3 rounded-xl border text-center font-bold text-sm transition-all ${
+                            isAllowed
+                              ? semester === sem
+                                ? 'border-white bg-white text-black shadow-md cursor-pointer'
+                                : 'border-zinc-800/80 bg-zinc-950/60 text-zinc-300 hover:border-zinc-600 hover:text-white cursor-pointer'
+                              : 'border-zinc-900/60 bg-zinc-950/20 text-zinc-600 opacity-25 cursor-not-allowed select-none'
+                          }`}
+                        >
+                          Sem {sem}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

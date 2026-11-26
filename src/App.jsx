@@ -118,13 +118,24 @@ function AppContent() {
     window.scrollTo(0, 0);
   };
 
+  const checkOnboardingDone = (u, profile) => {
+    if (!u) return false;
+    if (profile?.onboarding_completed) return true;
+    if (profile?.branch && profile?.semester) return true;
+    if (typeof window !== 'undefined' && localStorage.getItem(`onboarding_completed_${u.id}`) === 'true') {
+      return true;
+    }
+    return false;
+  };
+
   // Resolved active page accounting for route guards without cascading renders
   const activePage = (() => {
     if (loading) return route.page;
     if (!user && (route.page === 'app' || route.page === 'onboarding')) return 'login';
     if (user) {
-      const isOnboardingDone = Boolean(userProfile?.onboarding_completed);
+      const isOnboardingDone = checkOnboardingDone(user, userProfile);
       if (route.page === 'app' && !isOnboardingDone) return 'onboarding';
+      if (route.page === 'onboarding' && isOnboardingDone) return 'app';
       if (route.page === 'login' || route.page === 'register') {
         return isOnboardingDone ? 'app' : 'onboarding';
       }
@@ -138,9 +149,11 @@ function AppContent() {
       if (!user && (route.page === 'app' || route.page === 'onboarding')) {
         window.history.replaceState(null, '', '/login');
       } else if (user) {
-        const isOnboardingDone = Boolean(userProfile?.onboarding_completed);
+        const isOnboardingDone = checkOnboardingDone(user, userProfile);
         if (route.page === 'app' && !isOnboardingDone) {
           window.history.replaceState(null, '', '/onboarding');
+        } else if (route.page === 'onboarding' && isOnboardingDone) {
+          window.history.replaceState(null, '', '/app');
         } else if (route.page === 'login' || route.page === 'register') {
           window.history.replaceState(null, '', isOnboardingDone ? '/app' : '/onboarding');
         }

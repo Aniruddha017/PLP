@@ -85,12 +85,12 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#about" className="transition-colors hover:text-white">
-                  Why AI Tutor
+                  Features
                 </a>
               </li>
               <li>
                 <a href="#services" className="transition-colors hover:text-white">
-                  Subjects
+                  AKTU Subjects
                 </a>
               </li>
             </ul>
@@ -110,6 +110,17 @@ export default function Footer() {
               <li>
                 <a href="/app#study-plan" className="transition-colors hover:text-white">
                   Study Guides
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://github.com/aniruddha017/plp"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="flex items-center gap-1.5 transition-colors hover:text-white"
+                >
+                  <GithubLogo size={14} weight="regular" />
+                  <span>GitHub Repository</span>
                 </a>
               </li>
               <li>

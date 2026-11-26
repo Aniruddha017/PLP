@@ -1,110 +1,135 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowUpRight,
-  Atom,
   Code,
-  Flask,
-  Gear,
   TrendUp,
-  BookOpen,
-  SquaresFour,
+  Stack,
+  Terminal,
+  Brain,
+  Globe,
+  FileText,
+  Lightning,
+  ShieldCheck,
 } from './icons';
 
 const EASE_PREMIUM = [0.16, 1, 0.3, 1];
 
 const SUBJECTS = [
   {
-    id: 'math',
-    name: 'Mathematics',
-    icon: (
-      <span className="font-serif font-bold text-3xl sm:text-[34px] leading-none select-none">
-        Σ
-      </span>
-    ),
-    href: '/app#math',
+    id: 'kcs-301-dsa',
+    name: 'Data Structures',
+    code: 'KCS-301',
+    icon: <Stack size={30} weight="bold" />,
+    href: '/app#subjects',
   },
   {
-    id: 'physics',
-    name: 'Physics',
-    icon: <Atom size={34} weight="regular" />,
-    href: '/app#physics',
-  },
-  {
-    id: 'cs',
-    name: 'Computer Science',
-    icon: <Code size={32} weight="bold" />,
-    href: '/app#cs',
-  },
-  {
-    id: 'chemistry',
-    name: 'Chemistry',
-    icon: <Flask size={32} weight="regular" />,
-    href: '/app#chemistry',
-  },
-  {
-    id: 'biology',
-    name: 'Biology',
+    id: 'kcs-302-coa',
+    name: 'Computer Org & Architecture',
+    code: 'KCS-302',
     icon: (
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2.2"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="w-8 h-8"
+        className="w-7 h-7 sm:w-8 sm:h-8"
         aria-hidden="true"
       >
-        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
-        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+        <rect x="4" y="4" width="16" height="16" rx="2" />
+        <rect x="9" y="9" width="6" height="6" />
+        <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
       </svg>
     ),
-    href: '/app#biology',
+    href: '/app#subjects',
   },
   {
-    id: 'engineering',
-    name: 'Engineering',
-    icon: <Gear size={32} weight="regular" />,
-    href: '/app#engineering',
+    id: 'kcs-303-dstl',
+    name: 'Discrete Structures & Logic',
+    code: 'KCS-303',
+    icon: <Brain size={30} weight="regular" />,
+    href: '/app#subjects',
   },
   {
-    id: 'data-science',
-    name: 'Data Science',
+    id: 'kcs-401-os',
+    name: 'Operating Systems',
+    code: 'KCS-401',
+    icon: <Terminal size={30} weight="bold" />,
+    href: '/app#subjects',
+  },
+  {
+    id: 'kcs-402-tafl',
+    name: 'Theory of Automata (TAFL)',
+    code: 'KCS-402',
     icon: (
       <svg
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2.3"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="w-8 h-8"
+        className="w-7 h-7 sm:w-8 sm:h-8"
         aria-hidden="true"
       >
-        <path d="M6 5H4v14h2" />
-        <circle cx="12" cy="12" r="2.5" fill="currentColor" />
-        <path d="M18 5h2v14h-2" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="6" r="3" />
+        <circle cx="18" cy="18" r="3" />
+        <path d="M8.7 10.7l6.6-3.4M8.7 13.3l6.6 3.4" />
       </svg>
     ),
-    href: '/app#data-science',
+    href: '/app#subjects',
   },
   {
-    id: 'economics',
-    name: 'Economics',
-    icon: <TrendUp size={32} weight="bold" />,
-    href: '/app#economics',
+    id: 'kcs-403-oop',
+    name: 'Object Oriented Programming',
+    code: 'KCS-403',
+    icon: <Code size={30} weight="bold" />,
+    href: '/app#subjects',
   },
   {
-    id: 'humanities',
-    name: 'Humanities',
-    icon: <BookOpen size={32} weight="regular" />,
-    href: '/app#humanities',
+    id: 'kcs-501-dbms',
+    name: 'Database Management (DBMS)',
+    code: 'KCS-501',
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-7 h-7 sm:w-8 sm:h-8"
+        aria-hidden="true"
+      >
+        <ellipse cx="12" cy="5" rx="9" ry="3" />
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+      </svg>
+    ),
+    href: '/app#subjects',
   },
   {
-    id: 'more',
-    name: 'More Subjects',
-    icon: <SquaresFour size={32} weight="bold" />,
-    href: '/app',
+    id: 'kcs-502-cd',
+    name: 'Compiler Design',
+    code: 'KCS-502',
+    icon: <FileText size={30} weight="regular" />,
+    href: '/app#subjects',
+  },
+  {
+    id: 'kcs-503-daa',
+    name: 'Design & Analysis of Algorithms',
+    code: 'KCS-503',
+    icon: <TrendUp size={30} weight="bold" />,
+    href: '/app#subjects',
+  },
+  {
+    id: 'kcs-601-cn',
+    name: 'Computer Networks',
+    code: 'KCS-601',
+    icon: <Globe size={30} weight="regular" />,
+    href: '/app#subjects',
   },
 ];
 
@@ -136,7 +161,7 @@ export default function Services() {
     >
       <div className="mx-auto max-w-[1180px] px-4 sm:px-6">
         
-        {/* 1. Section Header matching Image */}
+        {/* 1. Section Header matching AKTU Curriculum */}
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -145,19 +170,24 @@ export default function Services() {
           className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 sm:mb-10 text-left"
         >
           <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 mb-2.5 backdrop-blur-md">
+              <span className="font-sans text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-300">
+                AKTU B.Tech CSE Curriculum
+              </span>
+            </div>
             <h2 className="font-display font-bold text-2xl sm:text-3xl lg:text-[2.25rem] text-white tracking-tight leading-tight">
-              Explore Subjects
+              Explore AKTU CSE Subjects
             </h2>
             <p className="font-sans text-xs sm:text-sm text-zinc-400 mt-1.5 font-normal">
-              From core STEM to humanities, learn and practice across 50+ subjects.
+              Official university syllabus across semesters — master fundamental logic to advanced systems.
             </p>
           </div>
 
           <a
-            href="/app"
+            href="/app#subjects"
             className="group inline-flex items-center gap-1.5 rounded-full bg-white px-5 py-2.5 font-sans text-xs sm:text-[13px] font-semibold text-black shadow-[0_2px_12px_rgba(255,255,255,0.1)] hover:bg-neutral-200 active:scale-95 transition-all duration-300 ease-premium shrink-0 cursor-pointer w-fit"
           >
-            <span>View All Subjects</span>
+            <span>View All Semester Topics</span>
             <ArrowUpRight
               size={14}
               weight="bold"
@@ -166,7 +196,7 @@ export default function Services() {
           </a>
         </motion.div>
 
-        {/* 2. Subjects Grid: 10 Cards in 5x2 Layout (Narrower container matching Hero workbench) */}
+        {/* 2. Subjects Grid: 10 Cards in 5x2 Layout */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -179,12 +209,15 @@ export default function Services() {
               key={subject.id}
               href={subject.href}
               variants={itemVariants}
-              className="group relative flex flex-col items-center justify-center h-[96px] sm:h-[110px] md:h-[116px] px-2.5 py-3 sm:px-3.5 sm:py-4 rounded-2xl border border-white/[0.08] bg-[#111113] hover:bg-[#18181c] hover:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-200 ease-out cursor-pointer active:scale-[0.98]"
+              className="group relative flex flex-col items-center justify-between min-h-[114px] sm:min-h-[122px] md:min-h-[128px] p-3 sm:p-3.5 rounded-2xl border border-white/[0.08] bg-[#111113] hover:bg-[#18181c] hover:border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-all duration-200 ease-out cursor-pointer active:scale-[0.98]"
             >
-              <div className="h-9 sm:h-10 flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors duration-200">
+              <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                {subject.code}
+              </span>
+              <div className="h-8 sm:h-9 flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors duration-200 my-1">
                 {subject.icon}
               </div>
-              <span className="font-sans text-[11.5px] sm:text-[13px] font-medium text-zinc-300 group-hover:text-white mt-1.5 sm:mt-2 text-center tracking-tight transition-colors duration-200 select-none">
+              <span className="font-sans text-[11px] sm:text-[12px] font-medium text-zinc-300 group-hover:text-white text-center tracking-tight leading-tight transition-colors duration-200 select-none line-clamp-2">
                 {subject.name}
               </span>
             </motion.a>

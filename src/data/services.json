@@ -1,19 +1,19 @@
 {
-  "badge": "INTELLIGENT LEARNING TRACKS",
+  "badge": "AKTU B.TECH CSE CURRICULUM",
   "titlePrefix": "Personalized Mentorship,",
-  "titleHighlight": "Across Any Subject",
-  "subtitle": "From rigorous STEM topics to humanities and technical interview prep, AI Tutor provides tailored curriculum, real-time feedback, and step-by-step guidance.",
+  "titleHighlight": "Aligned with AKTU Syllabus",
+  "subtitle": "Aligned with the official AKTU B.Tech CSE syllabus, AI Tutor provides tailored curriculum, real-time feedback, and step-by-step guidance.",
   "heroSpecialty": {
-    "badge": "Flagship Track — STEM & Computer Science",
-    "title": "Interactive STEM Problem Solving & Code Mentorship",
-    "desc": "Break down complex algorithms, calculus problems, and physics models with conversational step-by-step derivation. AI Tutor diagnoses where your logic deviates and steers you back on track.",
+    "badge": "Flagship Track — AKTU Computer Science & Engineering",
+    "title": "Interactive AKTU CSE Problem Solving & Code Mentorship",
+    "desc": "Break down complex algorithms, OS internals, DBMS queries, and automata with conversational step-by-step derivation. AI Tutor diagnoses where your logic deviates and steers you back on track.",
     "highlights": [
-      "Step-by-step mathematical derivations",
+      "Step-by-step mathematical derivations & automata proofs",
       "Interactive code debugging and complexity analysis",
-      "Instant practice problem generation",
+      "AKTU semester exam practice problem generation",
       "Socratic hints when you get stuck"
     ],
-    "ctaText": "Explore STEM Track"
+    "ctaText": "Explore AKTU CSE Track"
   },
   "treatments": [
     {

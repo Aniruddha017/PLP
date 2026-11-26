@@ -39,10 +39,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const profile = await authService.getUserProfile(userId);
       const metaYear = fallbackUser?.user_metadata?.year_of_study;
+      const isCompleted = Boolean(
+        profile?.onboarding_completed ||
+        (profile?.branch && profile?.semester) ||
+        (typeof window !== 'undefined' && localStorage.getItem(`onboarding_completed_${userId}`) === 'true')
+      );
+      if (isCompleted && typeof window !== 'undefined') {
+        localStorage.setItem(`onboarding_completed_${userId}`, 'true');
+      }
+
       if (profile) {
         setUserProfile({
           ...profile,
           year_of_study: profile.year_of_study ?? metaYear ?? null,
+          onboarding_completed: isCompleted,
         });
       } else if (fallbackUser) {
         setUserProfile({
@@ -51,6 +61,7 @@ export const AuthProvider = ({ children }) => {
           full_name: fallbackUser.user_metadata?.full_name || fallbackUser.user_metadata?.name || fallbackUser.email?.split('@')[0],
           avatar_url: fallbackUser.user_metadata?.avatar_url || fallbackUser.user_metadata?.picture || '',
           year_of_study: metaYear ?? null,
+          onboarding_completed: isCompleted,
         });
       } else {
         setUserProfile(profile);
@@ -86,21 +97,30 @@ export const AuthProvider = ({ children }) => {
 
     // 2. Listen to auth state transitions
     const { data: { subscription } } = authService.onAuthStateChange(async (event, newSession) => {
-      setSession(newSession);
-      setUser(newSession?.user ?? null);
-
       if (event === 'PASSWORD_RECOVERY') {
         setIsPasswordRecovery(true);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setLoading(false);
       } else if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        setLoading(true);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         if (newSession?.user?.id) {
           await loadProfile(newSession.user.id, newSession.user);
         }
+        setLoading(false);
       } else if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setUser(null);
         setUserProfile(null);
         setIsPasswordRecovery(false);
+        setLoading(false);
+      } else {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
     return () => {
@@ -109,11 +129,17 @@ export const AuthProvider = ({ children }) => {
   }, [loadProfile]);
 
   const signIn = async (email, password) => {
-    const data = await authService.signInWithEmail(email, password);
-    if (data?.user?.id) {
-      await loadProfile(data.user.id, data.user);
+    setLoading(true);
+    try {
+      const data = await authService.signInWithEmail(email, password);
+      if (data?.user?.id) {
+        setUser(data.user);
+        await loadProfile(data.user.id, data.user);
+      }
+      return data;
+    } finally {
+      setLoading(false);
     }
-    return data;
   };
 
   const signInWithGoogle = async () => {
@@ -151,7 +177,20 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     if (!user?.id) throw new Error('Not authenticated');
     const updated = await authService.updateUserProfile(user.id, updates);
-    setUserProfile((prev) => ({ ...(prev || {}), ...updated }));
+    if (updated?.onboarding_completed || updates?.onboarding_completed) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`onboarding_completed_${user.id}`, 'true');
+      }
+    }
+    setUserProfile((prev) => ({
+      ...(prev || {}),
+      ...updated,
+      onboarding_completed: Boolean(
+        updated?.onboarding_completed ||
+        updates?.onboarding_completed ||
+        prev?.onboarding_completed
+      ),
+    }));
     return updated;
   };
 

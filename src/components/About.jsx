@@ -7,6 +7,11 @@ import {
   User,
   Plus,
   PaperPlaneTilt,
+  ChatCircleDots,
+  FileText,
+  CalendarBlank,
+  ChartLineUp,
+  Sparkle,
 } from './icons';
 import Logo from './Logo';
 
@@ -14,24 +19,24 @@ const EASE_PREMIUM = [0.16, 1, 0.3, 1];
 
 const FEATURES = [
   {
-    icon: <Brain size={24} weight="regular" />,
-    title: 'Socratic Inquiry',
-    desc: 'Guides you with the right questions, helping you think deeper and build real understanding.',
+    icon: <ChatCircleDots size={24} weight="regular" />,
+    title: 'Socratic 1-on-1 AI Tutor',
+    desc: 'Interactive chat with step-by-step logic, LaTeX equations, code analysis, and hints that guide you without spoon-feeding answers.',
   },
   {
-    icon: <Stack size={24} weight="regular" />,
-    title: 'Real-Time Adaptive Pacing',
-    desc: 'Adjusts to your level, response speed, and learning goals in real time.',
+    icon: <FileText size={24} weight="regular" />,
+    title: 'Doc Learning (PDF & Notes)',
+    desc: 'Upload university lecture notes, faculty slides, or syllabus PDFs to get instant contextual summaries, key formulas, and grounded Q&A.',
   },
   {
-    icon: <SquaresFour size={24} weight="regular" />,
-    title: 'Multi-Disciplinary Mastery',
-    desc: 'Learn and connect concepts across Mathematics, Computer Science, Physics, Chemistry, and more.',
+    icon: <CalendarBlank size={24} weight="regular" />,
+    title: 'Automated Study Timetable',
+    desc: 'Generates a personalized weekly study schedule calibrated to your AKTU semester curriculum, weak subjects, and daily targets.',
   },
   {
-    icon: <Lightning size={24} weight="regular" />,
-    title: 'Multi-Modal Feedback',
-    desc: 'Get clear explanations with code, equations, and visual breakdowns whenever you need them.',
+    icon: <ChartLineUp size={24} weight="regular" />,
+    title: 'AKTU Syllabus & Topic Mastery',
+    desc: 'Track mastery across core semester subjects with interactive self-assessment quizzes, spaced repetition queues, and progress metrics.',
   },
 ];
 
@@ -100,30 +105,30 @@ export default function About() {
             viewport={{ once: true, amount: 0.1 }}
             className="flex flex-col"
           >
-            {/* 1. Eyebrow Badge matching Image 2 */}
+            {/* 1. Eyebrow Badge */}
             <motion.div variants={itemVariants}>
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5 backdrop-blur-md">
-                <Brain size={18} weight="regular" className="text-zinc-200 shrink-0" />
+                <Sparkle size={15} weight="fill" className="text-zinc-200 shrink-0" />
                 <span className="font-sans text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-zinc-300">
-                  The AI Tutor Advantage
+                  Core Platform Features
                 </span>
               </div>
             </motion.div>
 
-            {/* 2. Main Headline matching Image 2 */}
+            {/* 2. Main Headline */}
             <motion.h2
               variants={itemVariants}
               className="mt-4 font-display font-bold text-3xl sm:text-4xl lg:text-[40px] leading-[1.14] text-white tracking-tight"
             >
-              Built on Cognitive Science &amp; Intelligent Mentorship
+              Everything Built for B.Tech CSE Students
             </motion.h2>
 
-            {/* 3. Subtitle matching Image 2 */}
+            {/* 3. Subtitle */}
             <motion.p
               variants={itemVariants}
               className="mt-3 font-sans text-sm sm:text-base text-zinc-400 font-normal leading-relaxed max-w-xl"
             >
-              A learning experience designed around how you think, practice, and truly build lasting understanding.
+              A personalized AI learning suite tailored specifically around university syllabus, semester exams, and software engineering prep.
             </motion.p>
 
             {/* 4. Stacked Mockup Window with 3 layered cards behind matching Image */}

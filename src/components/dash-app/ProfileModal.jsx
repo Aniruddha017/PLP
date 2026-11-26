@@ -278,7 +278,15 @@ export const ProfileModal = ({ isOpen, onClose, onRetakeOnboarding }) => {
                   <label className="block text-xs font-semibold text-zinc-700 mb-1">Academic Year</label>
                   <select
                     value={yearOfStudy}
-                    onChange={(e) => setYearOfStudy(Number(e.target.value))}
+                    onChange={(e) => {
+                      const newYear = Number(e.target.value);
+                      setYearOfStudy(newYear);
+                      const minSem = newYear * 2 - 1;
+                      const maxSem = newYear * 2;
+                      if (semester < minSem || semester > maxSem) {
+                        setSemester(minSem);
+                      }
+                    }}
                     className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:border-zinc-900 cursor-pointer"
                   >
                     {[1, 2, 3, 4].map((y) => (
@@ -289,17 +297,29 @@ export const ProfileModal = ({ isOpen, onClose, onRetakeOnboarding }) => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-700 mb-1">Semester</label>
+                  <label className="block text-xs font-semibold text-zinc-700 mb-1">
+                    Semester <span className="text-[11px] text-zinc-400 font-normal">(Year {yearOfStudy})</span>
+                  </label>
                   <select
                     value={semester}
                     onChange={(e) => setSemester(Number(e.target.value))}
                     className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-900 focus:outline-none focus:border-zinc-900 cursor-pointer"
                   >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
-                      <option key={s} value={s}>
-                        Semester {s}
-                      </option>
-                    ))}
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => {
+                      const minSem = yearOfStudy * 2 - 1;
+                      const maxSem = yearOfStudy * 2;
+                      const isAllowed = s >= minSem && s <= maxSem;
+                      return (
+                        <option
+                          key={s}
+                          value={s}
+                          disabled={!isAllowed}
+                          className={!isAllowed ? 'text-zinc-400 bg-zinc-100' : 'text-zinc-900'}
+                        >
+                          Semester {s} {!isAllowed ? `(Not in Year ${yearOfStudy})` : ''}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               </div>

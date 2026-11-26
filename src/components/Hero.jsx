@@ -26,6 +26,7 @@ import {
   TrendUp,
   User,
   Users,
+  GithubLogo,
 } from './icons';
 import Logo from './Logo';
 import heroData from '../data/hero.json';
@@ -369,6 +370,22 @@ export default function Hero() {
         animate="show"
         className="relative z-10 flex w-full max-w-5xl flex-col items-center text-center"
       >
+        {/* GitHub Repository Badge */}
+        <motion.div variants={itemVariants} className="mb-4 sm:mb-5">
+          <a
+            href="https://github.com/aniruddha017/plp"
+            target="_blank"
+            rel="noreferrer noopener"
+            className="group inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 backdrop-blur-md text-xs font-medium text-zinc-300 hover:text-white hover:border-white/30 hover:bg-white/[0.08] transition-all duration-300 shadow-sm cursor-pointer"
+          >
+            <GithubLogo size={16} weight="regular" className="text-zinc-300 group-hover:text-white transition-colors" />
+            <span>Open Source on GitHub</span>
+            <span className="text-zinc-500">•</span>
+            <span className="font-mono text-[11.5px] text-zinc-400 group-hover:text-zinc-200">github.com/aniruddha017/plp</span>
+            <ArrowUpRight size={13} weight="bold" className="text-zinc-400 group-hover:text-white transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
+        </motion.div>
+
         {/* Display Typography */}
         <motion.h1
           variants={itemVariants}
@@ -438,14 +455,14 @@ export default function Hero() {
           {/* Divider */}
           <div className="h-8 w-px bg-white/10 hidden sm:block" />
 
-          {/* 2. 50+ Subjects */}
+          {/* 2. AKTU CSE Curriculum */}
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-white shadow-sm">
               <Stack size={20} weight="bold" />
             </div>
             <div>
-              <div className="font-semibold text-xs sm:text-[14px] text-white tracking-tight mb-0.5">50+ Subjects</div>
-              <div className="text-[12px] sm:text-[12.5px] text-zinc-400 font-normal">From STEM to Humanities</div>
+              <div className="font-semibold text-xs sm:text-[14px] text-white tracking-tight mb-0.5">AKTU CSE Syllabus</div>
+              <div className="text-[12px] sm:text-[12.5px] text-zinc-400 font-normal">Core B.Tech Semester Subjects</div>
             </div>
           </div>
 

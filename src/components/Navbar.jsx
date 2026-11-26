@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useMotionValueEvent, useReducedMotion } from 'framer-motion';
-import { List, X, ArrowUpRight } from './icons';
+import { List, X, ArrowUpRight, GithubLogo } from './icons';
 import Logo from './Logo';
 import siteData from '../data/site.json';
 
 const NAV_LINKS = [
   { label: 'Home', href: '#home' },
-  { label: 'Why AI Tutor', href: '#about' },
-  { label: 'Subjects', href: '#services' },
+  { label: 'Features', href: '#about' },
+  { label: 'AKTU Subjects', href: '#services' },
 ];
 
 export default function Navbar() {
@@ -26,9 +26,9 @@ export default function Navbar() {
     const updateActiveItem = () => {
       const hash = window.location.hash;
       if (hash === '#about') {
-        setActive('Why AI Tutor');
+        setActive('Features');
       } else if (hash === '#services') {
-        setActive('Subjects');
+        setActive('AKTU Subjects');
       } else {
         setActive('Home');
       }
@@ -93,6 +93,17 @@ export default function Navbar() {
         {/* Right CTA */}
         <div className="flex items-center gap-2 sm:gap-3">
           <a
+            href="https://github.com/aniruddha017/plp"
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="GitHub Repository"
+            className="hidden sm:inline-flex h-10 items-center justify-center gap-2 rounded-full border border-white/15 bg-white/[0.05] px-3.5 text-zinc-300 hover:text-white hover:bg-white/10 hover:border-white/30 transition-all active:scale-95 text-xs font-semibold cursor-pointer"
+          >
+            <GithubLogo size={16} weight="regular" />
+            <span>GitHub</span>
+          </a>
+
+          <a
             href="/app"
             className="group hidden h-10 items-center justify-center gap-2 rounded-full bg-white px-4 font-sans text-black border border-white/20 shadow-[0_2px_12px_rgba(255,255,255,0.08)] transition-all duration-300 ease-premium hover:bg-neutral-200 active:scale-95 cursor-pointer sm:inline-flex"
           >
@@ -140,7 +151,22 @@ export default function Navbar() {
               </a>
             </li>
           ))}
-          <li className="pt-5">
+          <li className="pt-2">
+            <a
+              href="https://github.com/aniruddha017/plp"
+              target="_blank"
+              rel="noreferrer noopener"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between border-b border-white/[0.05] py-3.5 font-display text-lg font-medium tracking-tight text-zinc-300 hover:text-white"
+            >
+              <span className="flex items-center gap-2.5">
+                <GithubLogo size={20} weight="regular" />
+                <span>GitHub Repository</span>
+              </span>
+              <ArrowUpRight size={16} weight="bold" className="text-zinc-500" />
+            </a>
+          </li>
+          <li className="pt-4">
             <a
               href="/app"
               onClick={() => setMenuOpen(false)}

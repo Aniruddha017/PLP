@@ -4,12 +4,12 @@
   "image": "/images/ai-tutor.webp",
   "imageAlt": "AI Tutor — Adaptive Learning Assistant",
   "doctorRole": "Intelligent Pedagogical Assistant",
-  "doctorSpeciality": "Socratic Method, Adaptive Learning & STEM Mastery",
+  "doctorSpeciality": "AKTU B.Tech CSE Syllabus, Socratic Mentorship & Exam Mastery",
   "doctorBioBullets": [
-    "Socratic Inquiry: Never just hands you the answer; guides you through first-principles thinking so concepts truly stick.",
+    "AKTU Syllabus-Aligned: Strictly follows official Dr. A.P.J. Abdul Kalam Technical University semester curriculum.",
     "Real-Time Adaptive Pacing: Calibrates complexity dynamically based on your quiz responses and comprehension speed.",
-    "Multi-Disciplinary Mastery: Comprehensive coverage spanning Mathematics, Computer Science, Physics, Chemistry, and Languages.",
-    "Instant Multi-Modal Feedback: Clarifies code snippets, mathematical equations, and scientific theorems with interactive visual breakdowns."
+    "Comprehensive CSE Core: Full coverage spanning Data Structures, Operating Systems, DBMS, Networks, and Automata.",
+    "Instant Multi-Modal Feedback: Clarifies code snippets, mathematical equations, and technical derivations with interactive visual breakdowns."
   ],
   "stats": [
     {
